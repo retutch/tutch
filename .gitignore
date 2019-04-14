@@ -1,0 +1,7 @@
+.nyc_output
+dist/
+*~
+\#*\#
+.\#*
+.vscode
+node_modules
