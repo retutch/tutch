@@ -1,3 +1,2 @@
 [submodule "tests"]
-	path = tests
-	url = git@github.com:avacado-productions/tutch-test.git
+	url = git@github.com:avocado-productions/tutch-test.git
