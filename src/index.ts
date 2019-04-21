@@ -1,7 +1,7 @@
 import * as Ast from './ast';
 import { Parser, Grammar } from 'nearley';
 export * from './ast';
-const rules = require("../dist/rules");
+const rules = require('../dist/rules');
 
 export function parse(str: string): any {
     const parser = new Parser(Grammar.fromCompiled(rules));

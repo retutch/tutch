@@ -16,33 +16,33 @@ export interface SourceLocation {
 }
 
 export interface Identifier extends Syn {
-    readonly type: "Identifier";
+    readonly type: 'Identifier';
     readonly name: string;
 }
 
 export type Proposition = PropTrue | PropFalse | Atom | PropAnd | PropImplies;
 
 export interface PropTrue extends Syn {
-    readonly type: "PropTrue";
+    readonly type: 'PropTrue';
 }
 
 export interface PropFalse extends Syn {
-    readonly type: "PropFalse";
+    readonly type: 'PropFalse';
 }
 
 export interface Atom extends Syn {
-    readonly type: "Atom";
+    readonly type: 'Atom';
     readonly predicate: string;
 }
 
 export interface PropAnd extends Syn {
-    readonly type: "PropAnd";
+    readonly type: 'PropAnd';
     readonly left: Proposition;
     readonly right: Proposition;
 }
 
 export interface PropImplies extends Syn {
-    readonly type: "PropImplies";
+    readonly type: 'PropImplies';
     readonly left: Proposition;
     readonly right: Proposition;
 }
@@ -50,13 +50,13 @@ export interface PropImplies extends Syn {
 export type ProofStep = Proposition | HypotheticalProof;
 
 export interface HypotheticalProof extends Syn {
-    readonly type: "HypotheticalProof";
-    hypotheses: Proposition[],
-    steps: ProofStep[],
+    readonly type: 'HypotheticalProof';
+    hypotheses: Proposition[];
+    steps: ProofStep[];
 }
 
 export interface Proof extends Syn {
-    readonly type: "Proof";
+    readonly type: 'Proof';
     readonly name: string;
     readonly goal: Proposition;
     readonly proof: ProofStep[];

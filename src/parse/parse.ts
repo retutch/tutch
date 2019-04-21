@@ -1,12 +1,12 @@
-import { Token } from "moo";
-import * as ast from "../ast";
+import { Token } from 'moo';
+import * as ast from '../ast';
 
 function tokloc(tok: Token) {
     return {
         start: { line: tok.line, column: tok.col },
         end: tok.lineBreaks
             ? { line: tok.line + 1, column: 1 }
-            : { line: tok.line, column: tok.col + tok.text.length }
+            : { line: tok.line, column: tok.col + tok.text.length },
     };
 }
 
@@ -17,92 +17,99 @@ export interface Syn {
 }
 
 type WS = string;
-function WS(): WS { return ""; }
+function WS(): WS {
+    return '';
+}
 
 export interface Identifier extends Syn {
-    type: "Identifier",
-    name: string,
-    range: [number, number],
-    loc: ast.SourceLocation,
+    type: 'Identifier';
+    name: string;
+    range: [number, number];
+    loc: ast.SourceLocation;
 }
 
 export function Identifier([tok]: [Token]): ast.Identifier & Syn {
     return {
-        type: "Identifier",
+        type: 'Identifier',
         name: tok.text,
         range: [tok.offset, tok.offset + tok.text.length],
         loc: tokloc(tok),
-    }
+    };
 }
 
-export type Proposition = ast.PropTrue & Syn | ast.PropFalse & Syn | Identifier | UnaryProposition | BinaryProposition
+export type Proposition =
+    | ast.PropTrue & Syn
+    | ast.PropFalse & Syn
+    | Identifier
+    | UnaryProposition
+    | BinaryProposition;
 
 export function PropTrue([tok]: [Token]): ast.PropTrue & Syn {
     return {
-        type: "PropTrue",
+        type: 'PropTrue',
         range: [tok.offset, tok.offset + tok.text.length],
         loc: tokloc(tok),
-    }
+    };
 }
 
 export function PropFalse([tok]: [Token]): ast.PropFalse & Syn {
     return {
-        type: "PropFalse",
+        type: 'PropFalse',
         range: [tok.offset, tok.offset + tok.text.length],
         loc: tokloc(tok),
-    }
+    };
 }
 
 export interface UnaryProposition extends Syn {
-    type: "UnaryProposition";
+    type: 'UnaryProposition';
     argument: Proposition;
 }
 
-export function UnaryProposition([neg,,argument]: [Token, WS, Proposition]): UnaryProposition {
+export function UnaryProposition([neg, , argument]: [Token, WS, Proposition]): UnaryProposition {
     return {
-        type: "UnaryProposition",
+        type: 'UnaryProposition',
         argument,
         range: [neg.offset, argument.range[1]],
         loc: { start: tokloc(neg).start, end: argument.loc.end },
-    }
+    };
 }
 
 export interface BinaryProposition extends Syn {
-    type: "BinaryProposition";
+    type: 'BinaryProposition';
     left: Proposition;
     oper: string;
     right: Proposition;
 }
 
-type BinaryPropositionArg = [Proposition, WS, string, WS, Proposition]
-export function BinaryProposition([left,, oper,, right]: BinaryPropositionArg): BinaryProposition {
+type BinaryPropositionArg = [Proposition, WS, string, WS, Proposition];
+export function BinaryProposition([left, , oper, , right]: BinaryPropositionArg): BinaryProposition {
     return {
-        type: "BinaryProposition",
+        type: 'BinaryProposition',
         left,
         oper: oper,
         right,
         range: [left.range[0], right.range[1]],
         loc: { start: left.loc.start, end: right.loc.end },
-    }
+    };
 }
 
-export type ProofStep = Proposition | HypotheticalProof
+export type ProofStep = Proposition | HypotheticalProof;
 
 export interface HypotheticalProof extends Syn {
-    type: "HypotheticalProof",
-    hypotheses: Proposition[],
-    steps: ProofStep[],
+    type: 'HypotheticalProof';
+    hypotheses: Proposition[];
+    steps: ProofStep[];
 }
 
 type HypotheticalProofArg = [Token, WS, Proposition[], WS, [Token, WS, ProofStep, WS][], Token];
-export function HypotheticalProof([l,, hypotheses,, steps, r]: HypotheticalProofArg) {
+export function HypotheticalProof([l, , hypotheses, , steps, r]: HypotheticalProofArg) {
     return {
-        type: "HypotheticalProof",
+        type: 'HypotheticalProof',
         hypotheses,
         steps: steps.map(x => x[2]),
         range: [l.offset, r.offset + r.text.length],
-        loc: { start: tokloc(l).start, end: tokloc(r).end }
-    }
+        loc: { start: tokloc(l).start, end: tokloc(r).end },
+    };
 }
 
 type HypothesesArg = [[Proposition, WS, Token, WS][], Proposition];
