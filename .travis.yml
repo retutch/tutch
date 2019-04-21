@@ -4,6 +4,6 @@ node_js: "node"
 
 script:
  - npm run nearley
+ - npm run tsc
  - npm test
  - npm run coveralls
- - npm run tsc
