@@ -1,2 +1,2 @@
 [submodule "tests"]
-	url = git@github.com:avocado-productions/tutch-test.git
+	url = https://github.com/avocado-productions/tutch-test.git
