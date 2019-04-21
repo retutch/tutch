@@ -1,0 +1,116 @@
+import { Token } from "moo";
+import * as ast from "../ast";
+
+function tokloc(tok: Token) {
+    return {
+        start: { line: tok.line, column: tok.col },
+        end: tok.lineBreaks
+            ? { line: tok.line + 1, column: 1 }
+            : { line: tok.line, column: tok.col + tok.text.length }
+    };
+}
+
+export interface Syn {
+    readonly type: string;
+    readonly range: [number, number];
+    readonly loc: ast.SourceLocation;
+}
+
+type WS = string;
+function WS(): WS { return ""; }
+
+export interface Identifier extends Syn {
+    type: "Identifier",
+    name: string,
+    range: [number, number],
+    loc: ast.SourceLocation,
+}
+
+export function Identifier([tok]: [Token]): ast.Identifier & Syn {
+    return {
+        type: "Identifier",
+        name: tok.text,
+        range: [tok.offset, tok.offset + tok.text.length],
+        loc: tokloc(tok),
+    }
+}
+
+export type Proposition = ast.PropTrue & Syn | ast.PropFalse & Syn | Identifier | UnaryProposition | BinaryProposition
+
+export function PropTrue([tok]: [Token]): ast.PropTrue & Syn {
+    return {
+        type: "PropTrue",
+        range: [tok.offset, tok.offset + tok.text.length],
+        loc: tokloc(tok),
+    }
+}
+
+export function PropFalse([tok]: [Token]): ast.PropFalse & Syn {
+    return {
+        type: "PropFalse",
+        range: [tok.offset, tok.offset + tok.text.length],
+        loc: tokloc(tok),
+    }
+}
+
+export interface UnaryProposition extends Syn {
+    type: "UnaryProposition";
+    argument: Proposition;
+}
+
+export function UnaryProposition([neg,,argument]: [Token, WS, Proposition]): UnaryProposition {
+    return {
+        type: "UnaryProposition",
+        argument,
+        range: [neg.offset, argument.range[1]],
+        loc: { start: tokloc(neg).start, end: argument.loc.end },
+    }
+}
+
+export interface BinaryProposition extends Syn {
+    type: "BinaryProposition";
+    left: Proposition;
+    oper: string;
+    right: Proposition;
+}
+
+type BinaryPropositionArg = [Proposition, WS, string, WS, Proposition]
+export function BinaryProposition([left,, oper,, right]: BinaryPropositionArg): BinaryProposition {
+    return {
+        type: "BinaryProposition",
+        left,
+        oper: oper,
+        right,
+        range: [left.range[0], right.range[1]],
+        loc: { start: left.loc.start, end: right.loc.end },
+    }
+}
+
+export type ProofStep = Proposition | HypotheticalProof
+
+export interface HypotheticalProof extends Syn {
+    type: "HypotheticalProof",
+    hypotheses: Proposition[],
+    steps: ProofStep[],
+}
+
+type HypotheticalProofArg = [Token, WS, Proposition[], WS, [Token, WS, ProofStep, WS][], Token];
+export function HypotheticalProof([l,, hypotheses,, steps, r]: HypotheticalProofArg) {
+    return {
+        type: "HypotheticalProof",
+        hypotheses,
+        steps: steps.map(x => x[2]),
+        range: [l.offset, r.offset + r.text.length],
+        loc: { start: tokloc(l).start, end: tokloc(r).end }
+    }
+}
+
+type HypothesesArg = [[Proposition, WS, Token, WS][], Proposition];
+export function Hypotheses([steps, last]: HypothesesArg): Proposition[] {
+    return steps.map(x => x[0]).concat([last]);
+}
+
+type ProofSequenceArg = [[ProofStep, WS, Token, WS][], ProofStep];
+export function ProofSequence([steps, last]: ProofSequenceArg): ProofStep[] {
+    return steps.map(x => x[0]).concat([last]);
+}

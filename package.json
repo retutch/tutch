@@ -7,7 +7,8 @@
         "test": "nyc mocha -r ts-node/register src/**/*_test.ts",
         "prenearley": "mkdirp dist",
         "nearley:spec": "nearleyc tests/testspec.ne -o dist/spec-rules.js",
-        "nearley": "npm-run-all --parallel nearley:spec",
+        "nearley:tutch": "nearleyc syntax/proof.ne -o dist/rules.js",
+        "nearley": "npm-run-all --parallel nearley:spec nearley:tutch",
         "prettier": "prettier --write **/*.json src/*.ts src/**/*.ts",
         "tsc": "tsc",
         "watch": "tsc -w"
