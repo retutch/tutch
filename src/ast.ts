@@ -12,7 +12,7 @@ export interface Position {
 export interface SourceLocation {
     readonly start: Position;
     readonly end: Position;
-    readonly source?: string | null;
+    readonly source: string | null;
 }
 
 export interface Identifier extends Syn {

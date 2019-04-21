@@ -7,7 +7,16 @@ function tokloc(tok: Token) {
         end: tok.lineBreaks
             ? { line: tok.line + 1, column: 1 }
             : { line: tok.line, column: tok.col + tok.text.length },
+        source: null,
     };
+}
+
+function locloc(left: ast.SourceLocation, right: ast.SourceLocation): ast.SourceLocation {
+    return {
+        start: left.start,
+        end: right.end,
+        source: null,
+    }
 }
 
 export interface Syn {
@@ -63,6 +72,7 @@ export function PropFalse([tok]: [Token]): ast.PropFalse & Syn {
 export interface UnaryProposition extends Syn {
     type: 'UnaryProposition';
     argument: Proposition;
+
 }
 
 export function UnaryProposition([neg, , argument]: [Token, WS, Proposition]): UnaryProposition {
@@ -70,7 +80,7 @@ export function UnaryProposition([neg, , argument]: [Token, WS, Proposition]): U
         type: 'UnaryProposition',
         argument,
         range: [neg.offset, argument.range[1]],
-        loc: { start: tokloc(neg).start, end: argument.loc.end },
+        loc: locloc(tokloc(neg), argument.loc),
     };
 }
 
@@ -89,7 +99,7 @@ export function BinaryProposition([left, , oper, , right]: BinaryPropositionArg)
         oper: oper,
         right,
         range: [left.range[0], right.range[1]],
-        loc: { start: left.loc.start, end: right.loc.end },
+        loc: locloc(left.loc, right.loc),
     };
 }
 
@@ -108,7 +118,7 @@ export function HypotheticalProof([l, , hypotheses, , steps, r]: HypotheticalPro
         hypotheses,
         steps: steps.map(x => x[2]),
         range: [l.offset, r.offset + r.text.length],
-        loc: { start: tokloc(l).start, end: tokloc(r).end },
+        loc: locloc(tokloc(l), tokloc(r)),
     };
 }
 

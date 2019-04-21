@@ -7,7 +7,7 @@ const util = require('./parse/parse');
 
 @lexer lexer
 
-Proposition -> _ Prop _   {% x => x[1] %}
+Proposition -> _ Prop _                              {% x => x[1] %}
 
 Prop     -> Prop0                                    {% id %}
 
