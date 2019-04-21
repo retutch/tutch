@@ -16,7 +16,7 @@ function locloc(left: ast.SourceLocation, right: ast.SourceLocation): ast.Source
         start: left.start,
         end: right.end,
         source: null,
-    }
+    };
 }
 
 export interface Syn {
@@ -72,7 +72,6 @@ export function PropFalse([tok]: [Token]): ast.PropFalse & Syn {
 export interface UnaryProposition extends Syn {
     type: 'UnaryProposition';
     argument: Proposition;
-
 }
 
 export function UnaryProposition([neg, , argument]: [Token, WS, Proposition]): UnaryProposition {
