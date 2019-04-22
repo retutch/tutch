@@ -1,6 +1,6 @@
 # Tutch
 
-[![Build Status](https://travis-ci.org/avocado-productions/tutch.svg?branch=master)](https://travis-ci.org/avocado-productions/tutch.svg?branch=master)
+[![Build Status](https://travis-ci.org/avocado-productions/tutch.svg?branch=master)](https://travis-ci.org/avocado-productions/tutch?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/avocado-productions/tutch/badge.svg?branch=master)](https://coveralls.io/github/avocado-productions/tutch?branch=master)
 
 A TypeScript implementation of the TUTorial proof CHecker (Tutch). This implementation is still in the early stages and is not ready for use.
