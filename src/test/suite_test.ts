@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, lstatSync } from 'fs';
 import { parseSpec, Spec } from './parsespec';
 import 'mocha';
 import { expect } from 'chai';
-import { Syn } from '../ast';
+import { Proof } from '../ast';
 import { parse, evaluate } from '..';
 import { join, extname } from 'path';
 
@@ -24,7 +24,7 @@ function testfile(filepath: string) {
 
     specs.forEach((spec, i) => {
         it(`test ${filepath}${i ? `.${i}` : ''}, should ${spec.description}`, () => {
-            let ast: Syn;
+            let ast: Proof[];
             if (spec.outcome === 'error') {
                 expect(() => {
                     ast = parse(contents);

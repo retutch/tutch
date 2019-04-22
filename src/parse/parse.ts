@@ -130,3 +130,22 @@ type ProofSequenceArg = [[ProofStep, WS, Token, WS][], ProofStep];
 export function ProofSequence([steps, last]: ProofSequenceArg): ProofStep[] {
     return steps.map(x => x[0]).concat([last]);
 }
+
+export interface ProofDeclaration extends Syn {
+    type: "ProofDeclaration",
+    name: string,
+    goal: Proposition,
+    steps: ProofStep[],
+}
+
+type ProofDeclarationArg = [Token, WS, Token, WS, Token, WS, Proposition, WS, Token, WS, Token, WS, ProofStep[], WS, Token];
+export function ProofDeclaration([proof,,id,,,,goal,,,,,,steps,,end]: ProofDeclarationArg): ProofDeclaration {
+    return {
+        type: "ProofDeclaration",
+        name: id.text,
+        goal,
+        steps,
+        range: [proof.offset, end.offset + end.text.length],
+        loc: locloc(tokloc(proof), tokloc(end)),
+    }
+}
