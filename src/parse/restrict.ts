@@ -1,6 +1,5 @@
 import * as ast from '../ast';
 import * as parse from './parse';
-import { Token } from 'moo';
 
 let range = false;
 let loc = false;
@@ -100,11 +99,13 @@ export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
     }
 }
 
-export function Proof([x, y, z]: [Token, parse.Proposition, parse.ProofStep[]]): ast.Proof {
+export function Proof(syn: parse.ProofDeclaration): ast.Proof {
     return {
         type: 'Proof',
-        name: x.text,
-        goal: Proposition(y),
-        proof: z.map(w => ProofStep(w)),
+        name: syn.name,
+        goal: Proposition(syn.goal),
+        proof: syn.steps.map(x => ProofStep(x)),
+        range: range ? syn.range : undefined,
+        loc: loc ? syn.loc : undefined,
     };
 }
