@@ -2,7 +2,11 @@
     "name": "tutch",
     "version": "0.0.1",
     "description": "Typescript implementation of Tutch, a TUTorial proof CHecker.",
-    "main": "index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.js",
+    "files": [
+        "/dist/**/*"
+    ],
     "scripts": {
         "coveralls": "nyc report --reporter=text-lcov | coveralls",
         "test": "nyc mocha -r ts-node/register src/**/*_test.ts",
