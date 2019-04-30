@@ -1,9 +1,19 @@
 language: node_js
 
-node_js: "node"
+node_js: node
 
 script:
  - npm run nearley
  - npm run tsc
  - npm test
  - npm run coveralls
+
+deploy:
+  provider: npm
+  email: rob@calculem.us
+  skip_cleanup: true
+  api_key:
+    secure: ebeNMAOHAP9CJid3FvDSmLVBvZACByN0xYiSLVbU7ISzKZr3NOaf1LSkJe7adtfza57FwbI7Mcg2DHCmjXevwUAOBtvIXpVNb0WPrL04siDeMeMhkaG5rbMaH0/9XV7f4PeXvfnp7tpvFgKxPa2xq38gn8nksyhJPQG9RnE0XB0f9Hqaah5C3Q1adyUMzxvL2/3m/XU6xLZz0DcWXbjVjJHkLQBwxDe8sVTaw54K8U4XhUeehWvuTTLhvnxb+uAKd0ypH3AGandv6LLVvbpaatL/rNY2GY9pKp80cJsWAhFohGYOc7gBHsT0KRdRdNkPNiHLF62H3jnsi/WgqJ1Tc2xYxSO4DjVkNHdzPjC2JioI48jx3ivUgLWj9YvIobH/cCEMVNl6vEAssHkTPd1fk5XOSFw4Lnhr0+5hK0p5hdUuDN17wfFA3y0LWKrC8QuQj/b8rG7DM3xOw61I5b0Jy7DvPhWI/fAQ6+URufIk4CqpTUXGhMJRoOYsZCzwLJovPFGkcgEdGu3EFK784KvhHT+clyOYAhMDytszzvBvJU33n27u+Il8hDI0VcUs0f1jmtAtEX6Zb9b/v46sa1wTLN8ab2ICedDMgDKPk31gLAdJPtOSbQzEYXtIhAYxjwFWkT03C917tHD1J9rR5w4L5sRWODuYC5yf371meUCswYY=
+  on:
+    repo: avocado-productions/tutch
+    branch: master
