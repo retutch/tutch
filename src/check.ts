@@ -91,7 +91,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): Hyp {
 
                 if (hyp.prop.type === 'PropAnd') {
                     if (equalProps(step, hyp.prop.left)) return { type: 'prop', prop: step, rule: 'AndE1' };
-                    if (equalProps(step, hyp.prop.right)) return { type: 'prop', prop: step, rule: 'AndE1' };
+                    if (equalProps(step, hyp.prop.right)) return { type: 'prop', prop: step, rule: 'AndE2' };
                 } else if (hyp.prop.type === 'PropImplies') {
                     if (equalProps(step, hyp.prop.right)) {
                         if (inHyps(hyp.prop.left, gamma)) return { type: 'prop', prop: step, rule: 'ImpE' };
