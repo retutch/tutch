@@ -1,4 +1,15 @@
-import { Proposition, ProofStep, PropImplies } from './ast';
+import { Proposition, ProofStep, PropImplies, SourceLocation, Syn } from './ast';
+
+export class NoJustification extends Error {
+    public readonly name: "NoJustification" = "NoJustification";
+    loc: SourceLocation | undefined;
+    constructor(msg: string, elem?: Syn | SourceLocation) {
+        super(msg);
+        if (!elem) return;
+        if ("type" in elem) this.loc = elem.loc;
+        else this.loc = elem;
+    }
+}
 
 type Hyp =
     | { type: 'prop'; prop: Proposition; rule: string }
@@ -80,7 +91,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): Hyp {
 
                 if (hyp.prop.type === 'PropAnd') {
                     if (equalProps(step, hyp.prop.left)) return { type: 'prop', prop: step, rule: 'AndE1' };
-                    if (equalProps(step, hyp.prop.right)) return { type: 'prop', prop: step, rule: 'AndE1' };
+                    if (equalProps(step, hyp.prop.right)) return { type: 'prop', prop: step, rule: 'AndE2' };
                 } else if (hyp.prop.type === 'PropImplies') {
                     if (equalProps(step, hyp.prop.right)) {
                         if (inHyps(hyp.prop.left, gamma)) return { type: 'prop', prop: step, rule: 'ImpE' };
@@ -88,6 +99,6 @@ function checkProofStep(gamma: Gamma, step: ProofStep): Hyp {
                 }
             }
         }
-        throw new Error(`Could not justify step`);
+        throw new NoJustification(`Could not justify step`, step);
     }
 }

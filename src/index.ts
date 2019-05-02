@@ -2,8 +2,9 @@ import * as Ast from './ast';
 import { Parser, Grammar } from 'nearley';
 import { checkProofSteps, equalProps } from './check';
 import { Proof } from './parse/restrict';
-export * from './ast';
 const rules = require('../dist/rules');
+export { NoJustification } from './check';
+export * from './ast';
 
 export function parse(str: string): Ast.Proof[] {
     const parser = new Parser(Grammar.fromCompiled(rules));

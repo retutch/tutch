@@ -1,8 +1,8 @@
 import * as ast from '../ast';
 import * as parse from './parse';
 
-let range = false;
-let loc = false;
+let range = true;
+let loc = true;
 
 export function Identifier(syn: parse.Identifier): ast.Identifier {
     return {
