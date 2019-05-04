@@ -3,7 +3,7 @@ import { parseSpec, Spec } from './parsespec';
 import 'mocha';
 import { expect } from 'chai';
 import { Proof } from '../ast';
-import { parse, evaluate } from '..';
+import { parse, evaluateAssert } from '..';
 import { join, extname } from 'path';
 
 function testfile(filepath: string) {
@@ -36,11 +36,11 @@ function testfile(filepath: string) {
             }
 
             if (spec.outcome === 'reject') {
-                expect(() => evaluate(ast)).to.throw();
+                expect(() => evaluateAssert(ast)).to.throw();
             }
 
             if (spec.outcome === 'pass') {
-                expect(() => evaluate(ast)).not.to.throw();
+                expect(() => evaluateAssert(ast)).not.to.throw();
             }
         });
     });
