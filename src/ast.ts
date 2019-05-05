@@ -20,7 +20,7 @@ export interface Identifier extends Syn {
     readonly name: string;
 }
 
-export type Proposition = PropTrue | PropFalse | Atom | PropAnd | PropImplies;
+export type Proposition = PropTrue | PropFalse | Atom | PropAnd | PropImplies | PropOr;
 
 export interface PropTrue extends Syn {
     readonly type: 'PropTrue';
@@ -43,6 +43,12 @@ export interface PropAnd extends Syn {
 
 export interface PropImplies extends Syn {
     readonly type: 'PropImplies';
+    readonly left: Proposition;
+    readonly right: Proposition;
+}
+
+export interface PropOr extends Syn {
+    readonly type: 'PropOr';
     readonly left: Proposition;
     readonly right: Proposition;
 }

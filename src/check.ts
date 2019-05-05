@@ -1,4 +1,4 @@
-import { Proposition, ProofStep, PropImplies, SourceLocation, Syn, Proof } from './ast';
+import { Proposition, ProofStep, SourceLocation, Syn, Proof } from './ast';
 
 export type Justification = Justified | NotJustified;
 
@@ -33,12 +33,11 @@ function equalProps(a: Proposition, b: Proposition): boolean {
         case 'Atom':
             return a.type === b.type && a.predicate === b.predicate;
         case 'PropTrue':
-            return a.type === b.type;
         case 'PropFalse':
             return a.type === b.type;
         case 'PropAnd':
-            return a.type === b.type && equalProps(a.left, b.left) && equalProps(a.right, b.right);
         case 'PropImplies':
+        case 'PropOr':
             return a.type === b.type && equalProps(a.left, b.left) && equalProps(a.right, b.right);
         default:
             return a;
@@ -54,13 +53,13 @@ function inHyps(a: Proposition, gamma: Gamma): Hyp | null {
     return null;
 }
 
-function implicationInHyps(a: PropImplies, gamma: Gamma): Hyp | null {
+function implicationInHyps(premise: Proposition, consequent: Proposition, gamma: Gamma): Hyp | null {
     for (let hyp of gamma) {
         if (hyp.type === 'implication') {
             if (
                 hyp.hyps.length === 1 &&
-                equalProps(a.left, hyp.hyps[0]) &&
-                equalProps(a.right, hyp.consequent)
+                equalProps(premise, hyp.hyps[0]) &&
+                equalProps(consequent, hyp.consequent)
             )
                 return hyp;
         }
@@ -90,35 +89,70 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
         return { hyp, justs };
     } else {
         // Check for introduction rules
-        if (step.type === 'PropAnd') {
-            const left = inHyps(step.left, gamma);
-            const right = inHyps(step.right, gamma);
-            if (left && right)
+        switch (step.type) {
+            case 'PropTrue': {
                 return {
-                    hyp: { type: 'prop', prop: step, rule: 'AndI' },
+                    hyp: { type: 'prop', prop: step, rule: 'TrueI' },
                     justs: [
                         {
                             type: 'Justified',
-                            rule: 'AndI',
+                            rule: 'TrueI',
                             loc: step.loc,
                             range: step.range,
                         },
                     ],
                 };
-        } else if (step.type === 'PropImplies') {
-            const premise = implicationInHyps(step, gamma);
-            if (premise)
-                return {
-                    hyp: { type: 'prop', prop: step, rule: 'ImpI' },
-                    justs: [
-                        {
-                            type: 'Justified',
-                            rule: 'ImpI',
-                            loc: step.loc,
-                            range: step.range,
-                        },
-                    ],
-                };
+            }
+            case 'PropAnd': {
+                const left = inHyps(step.left, gamma);
+                const right = inHyps(step.right, gamma);
+                if (left && right)
+                    return {
+                        hyp: { type: 'prop', prop: step, rule: 'AndI' },
+                        justs: [
+                            {
+                                type: 'Justified',
+                                rule: 'AndI',
+                                loc: step.loc,
+                                range: step.range,
+                            },
+                        ],
+                    };
+                break;
+            }
+            case 'PropImplies': {
+                const premise = implicationInHyps(step.left, step.right, gamma);
+                if (premise)
+                    return {
+                        hyp: { type: 'prop', prop: step, rule: 'ImpI' },
+                        justs: [
+                            {
+                                type: 'Justified',
+                                rule: 'ImpI',
+                                loc: step.loc,
+                                range: step.range,
+                            },
+                        ],
+                    };
+                break;
+            }
+            case 'PropOr': {
+                const left = inHyps(step.left, gamma);
+                const right = inHyps(step.right, gamma);
+                if (left || right)
+                    return {
+                        hyp: { type: 'prop', prop: step, rule: 'Ori' },
+                        justs: [
+                            {
+                                type: 'Justified',
+                                rule: left ? 'OrIL' : 'OrIR',
+                                loc: step.loc,
+                                range: step.range,
+                            },
+                        ],
+                    };
+                break;
+            }
         }
 
         // Check for elimination rules
@@ -137,7 +171,19 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                         ],
                     };
 
-                if (hyp.prop.type === 'PropAnd') {
+                if (hyp.prop.type === 'PropFalse') {
+                    return {
+                        hyp: { type: 'prop', prop: step, rule: 'FalseE' },
+                        justs: [
+                            {
+                                type: 'Justified',
+                                rule: 'FalseE',
+                                loc: step.loc,
+                                range: step.range,
+                            },
+                        ],
+                    };
+                } else if (hyp.prop.type === 'PropAnd') {
                     if (equalProps(step, hyp.prop.left))
                         return {
                             hyp: { type: 'prop', prop: step, rule: 'AndE1' },
@@ -176,6 +222,23 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                                     },
                                 ],
                             };
+                    }
+                } else if (hyp.prop.type === 'PropOr') {
+                    if (
+                        implicationInHyps(hyp.prop.left, step, gamma) &&
+                        implicationInHyps(hyp.prop.right, step, gamma)
+                    ) {
+                        return {
+                            hyp: { type: 'prop', prop: step, rule: 'OrE' },
+                            justs: [
+                                {
+                                    type: 'Justified',
+                                    rule: 'ImpE',
+                                    loc: step.loc,
+                                    range: step.range,
+                                },
+                            ],
+                        };
                     }
                 }
             }

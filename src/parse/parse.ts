@@ -103,12 +103,21 @@ export function UnaryProposition([neg, , argument]: [Token, WS, Proposition]): U
 export interface BinaryProposition extends Syn {
     type: 'BinaryProposition';
     left: Proposition;
-    oper: string;
+    oper: '&' | '=>' | '<=>' | '|';
     right: Proposition;
 }
 
 type BinaryPropositionArg = [Proposition, WS, string, WS, Proposition];
 export function BinaryProposition([left, , oper, , right]: BinaryPropositionArg): BinaryProposition {
+    switch (oper) {
+        case '&':
+        case '|':
+        case '<=>':
+        case '=>':
+            break;
+        default:
+            throw new Error(`Unidentified binary proposition %{oper}`);
+    }
     return {
         type: 'BinaryProposition',
         left,

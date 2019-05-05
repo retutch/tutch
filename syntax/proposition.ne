@@ -7,7 +7,7 @@ const util = require('./parse/parse');
 
 @lexer lexer
 
-Proposition -> _ Prop _                              {% util.PropParens %}
+Proposition -> _ Prop _                              {% x => x[1] %}
 
 Prop     -> Prop0                                    {% id %}
 
@@ -20,7 +20,7 @@ PropOp0  -> "<" "=" ">"                              {% () => "<=>" %}
 Prop5    -> "T"                                      {% util.PropTrue %}
           | "F"                                      {% util.PropFalse %}
           | %ident                                   {% util.Identifier %}
-          | "(" _ Prop _ ")"                         {% x => x[2] %}
+          | "(" _ Prop _ ")"                         {% util.PropParens %}
 Prop4    -> Prop5 {% id %} | PropUnop _ Prop4        {% util.UnaryProposition %}
 Prop3    -> Prop4 {% id %} | Prop4 _ PropOp3 _ Prop3 {% util.BinaryProposition %}
 Prop2    -> Prop3 {% id %} | Prop3 _ PropOp2 _ Prop2 {% util.BinaryProposition %}
