@@ -39,7 +39,7 @@ export interface PropParens extends Syn {
 
 export function PropParens([l, , argument, , r]: [Token, WS, Proposition, WS, Token]): PropParens {
     return {
-        type: "Parens",
+        type: 'Parens',
         argument,
         range: [l.offset, r.offset + r.text.length],
         loc: locloc(tokloc(l), tokloc(r)),
