@@ -4,6 +4,10 @@ import * as parse from './parse';
 let range = true;
 let loc = true;
 
+export function Parens(syn: parse.PropParens): ast.Proposition {
+    return Proposition(syn.argument);
+} 
+
 export function Identifier(syn: parse.Identifier): ast.Identifier {
     return {
         type: 'Identifier',

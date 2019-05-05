@@ -30,6 +30,22 @@ function WS(): WS {
     return '';
 }
 
+export interface PropParens extends Syn {
+    type: 'Parens';
+    argument: Proposition;
+    range: [number, number];
+    loc: ast.SourceLocation;
+}
+
+export function PropParens([l, , argument, , r]: [Token, WS, Proposition, WS, Token]): PropParens {
+    return {
+        type: "Parens",
+        argument,
+        range: [l.offset, r.offset + r.text.length],
+        loc: locloc(tokloc(l), tokloc(r)),
+    };
+}
+
 export interface Identifier extends Syn {
     type: 'Identifier';
     name: string;
@@ -49,6 +65,7 @@ export function Identifier([tok]: [Token]): ast.Identifier & Syn {
 export type Proposition =
     | ast.PropTrue & Syn
     | ast.PropFalse & Syn
+    | PropParens
     | Identifier
     | UnaryProposition
     | BinaryProposition;
