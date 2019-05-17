@@ -126,10 +126,15 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
 export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
     switch (syn.type) {
         case 'HypotheticalProof':
+            const steps = syn.steps.map(ProofStep);
+            if (steps.length === 0) throw new Error();
+            const consequent = steps.pop()!;
+            if (consequent.type === 'HypotheticalProof') throw new Error();
             return {
                 type: 'HypotheticalProof',
                 hypotheses: syn.hypotheses.map(Proposition),
-                steps: syn.steps.map(ProofStep),
+                steps,
+                consequent,
                 range: range ? syn.range : undefined,
                 loc: loc ? syn.loc : undefined,
             };

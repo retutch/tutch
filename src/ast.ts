@@ -53,12 +53,32 @@ export interface PropOr extends Syn {
     readonly right: Proposition;
 }
 
+export function propToString(prop: Proposition): string {
+    switch (prop.type) {
+        case 'PropOr':
+            return `${propToString(prop.left)} | ${propToString(prop.right)}`;
+        case 'PropAnd':
+            return `${propToString(prop.left)} & ${propToString(prop.right)}`;
+        case 'PropImplies':
+            return `${propToString(prop.left)} => ${propToString(prop.right)}`;
+        case 'PropTrue':
+            return 'T';
+        case 'PropFalse':
+            return 'F';
+        case 'Atom':
+            return prop.predicate;
+        default:
+            return prop;
+    }
+}
+
 export type ProofStep = Proposition | HypotheticalProof;
 
 export interface HypotheticalProof extends Syn {
     readonly type: 'HypotheticalProof';
     hypotheses: Proposition[];
     steps: ProofStep[];
+    consequent: Proposition;
 }
 
 export interface Proof extends Syn {
