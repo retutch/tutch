@@ -1,5 +1,7 @@
 import * as ast from '../ast';
 import * as parse from './parse';
+import { impossible } from '@calculemus/impossible';
+import { ParsingError } from '../error';
 
 let range = true;
 let loc = true;
@@ -31,7 +33,7 @@ export function PropFalse(syn: parse.Proposition): ast.PropFalse {
 
 export function Atom(syn: parse.Identifier): ast.Atom {
     if (!syn.name.match(/^[A-Z]/))
-        throw new Error('Atomic propositions must start with an upper case letter');
+        throw new ParsingError(syn, 'Atomic propositions must start with an upper case letter');
 
     return {
         type: 'Atom',
@@ -91,6 +93,41 @@ export function PropNot(syn: parse.UnaryProposition): ast.PropImplies {
     };
 }
 
+export function Sort(id: ast.Identifier): 'nat' | 't' {
+    switch (id.name) {
+        case 't':
+        case 'nat':
+            return id.name;
+        default:
+            throw new ParsingError(
+                id,
+                'Only `nat` and `t` are allowed as first-order types, not `${id.name}`'
+            );
+    }
+}
+
+export function PropAll(syn: parse.QuantifiedProposition): ast.PropAll {
+    return {
+        type: 'PropAll',
+        variable: syn.variable,
+        sort: Sort(syn.sort),
+        argument: Proposition(syn.argument),
+        range: range ? syn.range : undefined,
+        loc: loc ? syn.loc : undefined,
+    };
+}
+
+export function PropExists(syn: parse.QuantifiedProposition): ast.PropExists {
+    return {
+        type: 'PropExists',
+        variable: syn.variable,
+        sort: Sort(syn.sort),
+        argument: Proposition(syn.argument),
+        range: range ? syn.range : undefined,
+        loc: loc ? syn.loc : undefined,
+    };
+}
+
 export function Proposition(syn: parse.Proposition): ast.Proposition {
     switch (syn.type) {
         case 'Parens':
@@ -112,14 +149,24 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
                 case '|':
                     return PropOr(syn);
                 default:
-                    return syn.oper;
+                    return impossible(syn.oper);
             }
         }
         case 'UnaryProposition': {
             return PropNot(syn);
         }
+        case 'QuantifiedProposition': {
+            switch (syn.oper) {
+                case '!':
+                    return PropAll(syn);
+                case '?':
+                    return PropExists(syn);
+                default:
+                    return impossible(syn.oper);
+            }
+        }
         default:
-            return syn;
+            return impossible(syn);
     }
 }
 
@@ -127,9 +174,13 @@ export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
     switch (syn.type) {
         case 'HypotheticalProof':
             const steps = syn.steps.map(ProofStep);
-            if (steps.length === 0) throw new Error();
+            if (steps.length === 0) throw new ParsingError(syn, 'Hypothetical proof has zero steps');
             const consequent = steps.pop()!;
-            if (consequent.type === 'HypotheticalProof') throw new Error();
+            if (consequent.type === 'HypotheticalProof')
+                throw new ParsingError(
+                    consequent,
+                    'Hypothetical proof [...] must end with a proposition, not another hypothetical sequence.'
+                );
             return {
                 type: 'HypotheticalProof',
                 hypotheses: syn.hypotheses.map(Proposition),

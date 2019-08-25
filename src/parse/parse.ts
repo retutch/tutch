@@ -1,5 +1,6 @@
 import { Token } from 'moo';
 import * as ast from '../ast';
+import { ImpossibleError } from '../error';
 
 function tokloc(tok: Token) {
     return {
@@ -68,7 +69,8 @@ export type Proposition =
     | PropParens
     | Identifier
     | UnaryProposition
-    | BinaryProposition;
+    | BinaryProposition
+    | QuantifiedProposition;
 
 export function PropTrue([tok]: [Token]): ast.PropTrue & Syn {
     return {
@@ -116,7 +118,7 @@ export function BinaryProposition([left, , oper, , right]: BinaryPropositionArg)
         case '=>':
             break;
         default:
-            throw new Error(`Unidentified binary proposition %{oper}`);
+            throw new ImpossibleError(`Unidentified binary proposition %{oper}`);
     }
     return {
         type: 'BinaryProposition',
@@ -125,6 +127,58 @@ export function BinaryProposition([left, , oper, , right]: BinaryPropositionArg)
         right,
         range: [left.range[0], right.range[1]],
         loc: locloc(left.loc, right.loc),
+    };
+}
+
+export interface QuantifiedProposition extends Syn {
+    type: 'QuantifiedProposition';
+    oper: '!' | '?';
+    variable: Identifier;
+    sort: Identifier;
+    argument: Proposition;
+}
+
+type QuantifiedPropositionArg = [
+    Token,
+    WS,
+    Identifier,
+    WS,
+    Token,
+    WS,
+    Identifier,
+    WS,
+    Token,
+    WS,
+    Proposition
+];
+export function QuantifiedProposition([
+    oper,
+    ,
+    x,
+    ,
+    ,
+    ,
+    ty,
+    ,
+    ,
+    ,
+    argument,
+]: QuantifiedPropositionArg): QuantifiedProposition {
+    switch (oper.text) {
+        case '!':
+        case '?':
+            break;
+        default:
+            throw new ImpossibleError(`Unidentified quantifier %{oper}`);
+    }
+    return {
+        type: 'QuantifiedProposition',
+        oper: oper.text,
+        variable: x,
+        sort: ty,
+        argument,
+        range: [oper.offset, argument.range[1]],
+        loc: locloc(tokloc(oper), argument.loc),
     };
 }
 

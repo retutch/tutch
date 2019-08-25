@@ -1,4 +1,5 @@
 import { Proposition, ProofStep, SourceLocation, Syn, Proof } from './ast';
+import { impossible } from '@calculemus/impossible';
 
 export type Justification = Justified | NotJustified;
 
@@ -47,8 +48,15 @@ function equalProps(a: Proposition, b: Proposition): boolean {
         case 'PropImplies':
         case 'PropOr':
             return a.type === b.type && equalProps(a.left, b.left) && equalProps(a.right, b.right);
+        case 'PropAll':
+            console.log('WARNING: equality on quantified types not fully checked');
+            return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
+        case 'PropExists':
+            console.log('WARNING: equality on quantified types not fully checked');
+            return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
+
         default:
-            return a;
+            return impossible(a);
     }
 }
 
