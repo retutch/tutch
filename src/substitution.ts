@@ -21,6 +21,7 @@ export function closeTerm(t: Ast.Term, i: number, x: string): Ast.Term {
             // (i.e. during parsing) and will NEVER need to update de bruijn indices.
             // This may need to be revisited!
             return t;
+        /* istanbul ignore next */
         default:
             return impossible(t);
     }
@@ -54,6 +55,7 @@ export function closeProp(prop: Ast.Proposition, i: number, x: string): Ast.Prop
         case 'PropFalse':
         case 'PropTrue':
             return prop;
+        /* istanbul ignore next */
         default:
             return impossible(prop);
     }
