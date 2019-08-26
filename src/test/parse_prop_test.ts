@@ -60,7 +60,7 @@ describe('The proposition parser', () => {
     });
 
     it('should parse precedence correctly', () => {
-        expect(parsePrint('A x y z')).to.equal('(A x y z)');
+        expect(parsePrint('A x y z')).to.equal('A x y z');
         expect(parsePrint('A => B')).to.equal('(A => B)');
         expect(parsePrint('A => B => C')).to.equal('(A => (B => C))');
         expect(parsePrint('A & B => C & D')).to.equal('((A & B) => (C & D))');
@@ -69,5 +69,7 @@ describe('The proposition parser', () => {
         expect(parsePrint('A & !a:t. B => C')).to.equal('(A & (!a:t.(B => C)))');
         expect(parsePrint('A | ?a:t. B => C')).to.equal('(A | (?a:t.(B => C)))');
         expect(parsePrint('A => ?a:t. B | C')).to.equal('(A => (?a:t.(B | C)))');
+        expect(parsePrint('F => ?a:t. B a | C b')).to.equal('(F => (?a:t.(B a | C b)))');
+        expect(parsePrint('T => !b:t. B a | C b')).to.equal('(T => (!b:t.(B a | C b)))');
     });
 });

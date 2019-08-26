@@ -1,3 +1,5 @@
+import { impossible } from '@calculemus/impossible';
+
 export interface Syn {
     readonly type: string;
     readonly range?: [number, number];
@@ -124,13 +126,10 @@ export function propToString(sigma: string[], prop: Proposition): string {
             return `(?${x}:${prop.sort}.${propToString([x].concat(sigma), prop.argument)})`;
         }
         case 'Atom':
-            if (prop.spine.length === 0) {
-                return prop.predicate;
-            } else {
-                return `(${prop.predicate}${prop.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')})`;
-            }
+            return `${prop.predicate}${prop.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')}`;
+        /* istanbul ignore next */
         default:
-            return prop;
+            return impossible(prop);
     }
 }
 
