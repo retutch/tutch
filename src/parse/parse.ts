@@ -109,7 +109,7 @@ export function PropAtom([head, args]: [Token, [WS, Term][]]): PropAtom & Syn {
     let rightRange;
     let rightLoc;
 
-    if (spine.length > 1) {
+    if (spine.length > 0) {
         rightRange = spine[spine.length - 1].range[1];
         rightLoc = spine[spine.length - 1].loc;
     } else {
