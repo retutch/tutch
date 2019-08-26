@@ -97,7 +97,7 @@ export function termToString(sigma: string[], tm: Term): string {
         case 'Const':
             return tm.name;
         case 'Term':
-            return `(${tm.head}${tm.spine.map(tm => ` ${termToString(sigma, tm)}`)})`;
+            return `(${tm.head}${tm.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')})`;
         case 'Var':
             return sigma[tm.index];
     }
@@ -127,7 +127,7 @@ export function propToString(sigma: string[], prop: Proposition): string {
             if (prop.spine.length === 0) {
                 return prop.predicate;
             } else {
-                return `(${prop.predicate}${prop.spine.map(tm => ` ${termToString(sigma, tm)}`).join()})`;
+                return `(${prop.predicate}${prop.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')})`;
             }
         default:
             return prop;

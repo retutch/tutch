@@ -57,25 +57,26 @@ export function TermParens([l, , argument, , r]: [Token, WS, Term, WS, Token]): 
     };
 }
 
-export function TermAtom([head, args]: [Token, [WS, Term][]]): TermAtom & Syn {
-    const spine = args.map(([, term]) => term);
-    let rightRange;
-    let rightLoc;
+export function TermConst([tok]: [Token]): TermAtom & Syn {
+    return {
+        type: 'Atom',
+        head: tok.text,
+        spine: [],
+        range: [tok.offset, tok.offset.toExponential.length],
+        loc: tokloc(tok),
+    };
+}
 
-    if (spine.length > 1) {
-        rightRange = spine[spine.length - 1].range[1];
-        rightLoc = spine[spine.length - 1].loc;
-    } else {
-        rightRange = head.offset + head.text.length;
-        rightLoc = tokloc(head);
-    }
+export function TermAtom([l, , head, args, , r]: [Token, WS, Token, [WS, Term][], WS, Token]): TermAtom &
+    Syn {
+    const spine = args.map(([, term]) => term);
 
     return {
         type: 'Atom',
         head: head.text,
         spine,
-        range: [head.offset, rightRange],
-        loc: locloc(tokloc(head), rightLoc),
+        range: [l.offset, r.offset + r.text.length],
+        loc: locloc(tokloc(l), tokloc(r)),
     };
 }
 

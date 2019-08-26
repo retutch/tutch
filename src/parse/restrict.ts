@@ -123,7 +123,7 @@ export function Sort(loc: ast.SourceLocation, id: string): 'nat' | 't' {
         case 't':
             return id;
         default:
-            throw new ParsingError(loc, 'Only `t` is allowed as first-order types, not `${id.name}`');
+            throw new ParsingError(loc, `Only \`t\` is allowed as a first-order type, not ${id}`);
     }
 }
 

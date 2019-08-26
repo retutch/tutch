@@ -9,12 +9,13 @@ const util = require('./parse/parse');
 
 Proposition -> _ Prop _                                 {% x => x[1] %}
 
-Term     -> "(" Term ")"                                {% util.TermParens %}
-          | %ident (_ Term):*                           {% util.Term %} 
+Term     -> "(" _ Term _ ")"                            {% util.TermParens %}
+          | "(" _ %ident (_ Term):+ _ ")"               {% util.TermAtom %} 
+          | %ident                                      {% util.TermConst %}
 
 Prop     -> Prop0q                                      {% id %}
-Type     -> "nat" {% util.Identifier %} 
-          | %ident {% util.Identifier %}
+Type     -> "nat"                                       {% id %} 
+          | %ident                                      {% id %}
 
 PropUnop -> "~"                                         {% id %}
 PropOp3  -> "&"                                         {% () => "&" %}
@@ -26,7 +27,7 @@ QuantOp  -> "!" {% id %} | "?" {% id %}
 
 Prop5    -> "T"                                         {% util.PropTrue %}
           | "F"                                         {% util.PropFalse %}
-          | %ident (_ Term):*                           {% util.Atom %}
+          | %ident (_ Term):*                           {% util.PropAtom %}
           | "(" _ Prop _ ")"                            {% util.PropParens %}
 
 Prop4    -> Prop5  {% id %} | PropUnop _ Prop4          {% util.UnaryProposition %}
