@@ -1,5 +1,6 @@
 import { Token } from 'moo';
 import * as ast from '../ast';
+import { ImpossibleError } from '../error';
 
 function tokloc(tok: Token) {
     return {
@@ -30,14 +31,24 @@ function WS(): WS {
     return '';
 }
 
-export interface PropParens extends Syn {
+export interface TermParens extends Syn {
     type: 'Parens';
-    argument: Proposition;
+    argument: Term;
     range: [number, number];
     loc: ast.SourceLocation;
 }
 
-export function PropParens([l, , argument, , r]: [Token, WS, Proposition, WS, Token]): PropParens {
+export interface TermAtom extends Syn {
+    type: 'Atom';
+    head: string;
+    spine: Term[];
+    range: [number, number];
+    loc: ast.SourceLocation;
+}
+
+export type Term = TermParens | TermAtom;
+
+export function TermParens([l, , argument, , r]: [Token, WS, Term, WS, Token]): TermParens & Syn {
     return {
         type: 'Parens',
         argument,
@@ -46,19 +57,72 @@ export function PropParens([l, , argument, , r]: [Token, WS, Proposition, WS, To
     };
 }
 
-export interface Identifier extends Syn {
-    type: 'Identifier';
-    name: string;
+export function TermConst([tok]: [Token]): TermAtom & Syn {
+    return {
+        type: 'Atom',
+        head: tok.text,
+        spine: [],
+        range: [tok.offset, tok.offset.toExponential.length],
+        loc: tokloc(tok),
+    };
+}
+
+export function TermAtom([l, , head, args, , r]: [Token, WS, Token, [WS, Term][], WS, Token]): TermAtom &
+    Syn {
+    const spine = args.map(([, term]) => term);
+
+    return {
+        type: 'Atom',
+        head: head.text,
+        spine,
+        range: [l.offset, r.offset + r.text.length],
+        loc: locloc(tokloc(l), tokloc(r)),
+    };
+}
+
+export interface PropParens extends Syn {
+    type: 'Parens';
+    argument: Proposition;
     range: [number, number];
     loc: ast.SourceLocation;
 }
 
-export function Identifier([tok]: [Token]): ast.Identifier & Syn {
+export function PropParens([l, , argument, , r]: [Token, WS, Proposition, WS, Token]): PropParens & Syn {
     return {
-        type: 'Identifier',
-        name: tok.text,
-        range: [tok.offset, tok.offset + tok.text.length],
-        loc: tokloc(tok),
+        type: 'Parens',
+        argument,
+        range: [l.offset, r.offset + r.text.length],
+        loc: locloc(tokloc(l), tokloc(r)),
+    };
+}
+
+export interface PropAtom extends Syn {
+    type: 'PropAtom';
+    head: string;
+    spine: Term[];
+    range: [number, number];
+    loc: ast.SourceLocation;
+}
+
+export function PropAtom([head, args]: [Token, [WS, Term][]]): PropAtom & Syn {
+    const spine = args.map(([, term]) => term);
+    let rightRange;
+    let rightLoc;
+
+    if (spine.length > 1) {
+        rightRange = spine[spine.length - 1].range[1];
+        rightLoc = spine[spine.length - 1].loc;
+    } else {
+        rightRange = head.offset + head.text.length;
+        rightLoc = tokloc(head);
+    }
+
+    return {
+        type: 'PropAtom',
+        head: head.text,
+        spine,
+        range: [head.offset, rightRange],
+        loc: locloc(tokloc(head), rightLoc),
     };
 }
 
@@ -66,9 +130,10 @@ export type Proposition =
     | ast.PropTrue & Syn
     | ast.PropFalse & Syn
     | PropParens
-    | Identifier
+    | PropAtom
     | UnaryProposition
-    | BinaryProposition;
+    | BinaryProposition
+    | QuantifiedProposition;
 
 export function PropTrue([tok]: [Token]): ast.PropTrue & Syn {
     return {
@@ -116,7 +181,7 @@ export function BinaryProposition([left, , oper, , right]: BinaryPropositionArg)
         case '=>':
             break;
         default:
-            throw new Error(`Unidentified binary proposition %{oper}`);
+            throw new ImpossibleError(`Unidentified binary proposition %{oper}`);
     }
     return {
         type: 'BinaryProposition',
@@ -125,6 +190,58 @@ export function BinaryProposition([left, , oper, , right]: BinaryPropositionArg)
         right,
         range: [left.range[0], right.range[1]],
         loc: locloc(left.loc, right.loc),
+    };
+}
+
+export interface QuantifiedProposition extends Syn {
+    type: 'QuantifiedProposition';
+    oper: '!' | '?';
+    variable: string;
+    sort: string;
+    argument: Proposition;
+}
+
+type QuantifiedPropositionArg = [
+    Token, // ! or ?
+    WS,
+    Token, // variable name
+    WS,
+    Token, // :
+    WS,
+    Token, // sort name
+    WS,
+    Token, // .
+    WS,
+    Proposition
+];
+export function QuantifiedProposition([
+    oper,
+    ,
+    x,
+    ,
+    ,
+    ,
+    ty,
+    ,
+    ,
+    ,
+    argument,
+]: QuantifiedPropositionArg): QuantifiedProposition {
+    switch (oper.text) {
+        case '!':
+        case '?':
+            break;
+        default:
+            throw new ImpossibleError(`Unidentified quantifier %{oper}`);
+    }
+    return {
+        type: 'QuantifiedProposition',
+        oper: oper.text,
+        variable: x.text,
+        sort: ty.text,
+        argument,
+        range: [oper.offset, argument.range[1]],
+        loc: locloc(tokloc(oper), argument.loc),
     };
 }
 

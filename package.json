@@ -1,6 +1,6 @@
 {
     "name": "tutch",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "Typescript implementation of Tutch, a TUTorial proof CHecker.",
     "main": "dist/index.js",
     "types": "dist/index.d.js",
@@ -13,7 +13,8 @@
         "prenearley": "mkdirp dist",
         "nearley:spec": "nearleyc tests/testspec.ne -o dist/spec-rules.js",
         "nearley:tutch": "nearleyc syntax/proof.ne -o dist/rules.js",
-        "nearley": "npm-run-all --parallel nearley:spec nearley:tutch",
+        "nearley:proposition": "nearleyc syntax/proposition.ne -o dist/proposition.js",
+        "nearley": "npm-run-all --parallel nearley:spec nearley:tutch nearley:proposition",
         "prettier": "prettier --write **/*.json src/*.ts src/**/*.ts",
         "tsc": "tsc",
         "watch": "tsc -w"
@@ -48,6 +49,7 @@
         "webpack": "^4.30.0"
     },
     "dependencies": {
+        "@calculemus/impossible": "0.0.4",
         "moo": "^0.5.0",
         "nearley": "^2.16.0"
     },

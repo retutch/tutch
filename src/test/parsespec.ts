@@ -1,4 +1,5 @@
 import { Parser, Grammar } from 'nearley';
+import { ImpossibleError } from '../error';
 const testSpecRules = require('../../dist/spec-rules');
 
 export interface Spec {
@@ -19,7 +20,7 @@ export function parseSpec(spec: string, filename?: string): Spec[] {
     if (specs.length === 0) throw new Error('No test spec found');
     /* istanbul ignore next */
     if (specs.length > 1) {
-        throw new Error('Test spec parsing ambiguous (should be impossible, please report)');
+        throw new ImpossibleError('Test spec parsing ambiguous');
     }
 
     return specs[0][0].map((spec: any) => {
