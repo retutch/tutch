@@ -73,7 +73,7 @@ function equalProps(a: Proposition, b: Proposition): boolean {
             return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
         case 'PropExists':
             return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
-
+        /* istanbul ignore next */
         default:
             return impossible(a);
     }
