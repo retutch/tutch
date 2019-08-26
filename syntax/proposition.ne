@@ -7,23 +7,27 @@ const util = require('./parse/parse');
 
 @lexer lexer
 
-Proposition -> _ Prop _                               {% x => x[1] %}
+Proposition -> _ Prop _                                 {% x => x[1] %}
 
-Prop     -> Prop0q                                    {% id %}
-Type     -> "nat" {% util.Identifier %} | %ident {% util.Identifier %}
+Term     -> "(" Term ")"                                {% util.TermParens %}
+          | %ident (_ Term):*                           {% util.Term %} 
 
-PropUnop -> "~"                                       {% id %}
-PropOp3  -> "&"                                       {% () => "&" %}
-PropOp2  -> "|"                                       {% () => "|" %}
-PropOp1  -> "=" ">"                                   {% () => "=>" %}
-PropOp0  -> "<" "=" ">"                               {% () => "<=>" %}
+Prop     -> Prop0q                                      {% id %}
+Type     -> "nat" {% util.Identifier %} 
+          | %ident {% util.Identifier %}
+
+PropUnop -> "~"                                         {% id %}
+PropOp3  -> "&"                                         {% () => "&" %}
+PropOp2  -> "|"                                         {% () => "|" %}
+PropOp1  -> "=" ">"                                     {% () => "=>" %}
+PropOp0  -> "<" "=" ">"                                 {% () => "<=>" %}
 
 QuantOp  -> "!" {% id %} | "?" {% id %}
 
-Prop5    -> "T"                                        {% util.PropTrue %}
-          | "F"                                        {% util.PropFalse %}
-          | %ident                                     {% util.Identifier %}
-          | "(" _ Prop _ ")"                           {% util.PropParens %}
+Prop5    -> "T"                                         {% util.PropTrue %}
+          | "F"                                         {% util.PropFalse %}
+          | %ident (_ Term):*                           {% util.Atom %}
+          | "(" _ Prop _ ")"                            {% util.PropParens %}
 
 Prop4    -> Prop5  {% id %} | PropUnop _ Prop4          {% util.UnaryProposition %}
 Prop3    -> Prop4  {% id %} | Prop4 _ PropOp3 _ Prop3   {% util.BinaryProposition %}

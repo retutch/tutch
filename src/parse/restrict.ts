@@ -2,17 +2,40 @@ import * as ast from '../ast';
 import * as parse from './parse';
 import { impossible } from '@calculemus/impossible';
 import { ParsingError } from '../error';
+import { closeProp } from '../substitution';
 
 let range = true;
 let loc = true;
 
-export function Identifier(syn: parse.Identifier): ast.Identifier {
-    return {
-        type: 'Identifier',
-        name: syn.name,
-        range: range ? syn.range : undefined,
-        loc: loc ? syn.loc : undefined,
-    };
+export function TermAtom(syn: parse.TermAtom): ast.TermAtom | ast.TermConst {
+    if (!syn.head.match(/^[a-z]/))
+        throw new ParsingError(syn, 'Term variables and constants must start with a lower case letter');
+
+    if (syn.spine.length === 0) {
+        return {
+            type: 'Const',
+            name: syn.head,
+            range: range ? syn.range : undefined,
+            loc: loc ? syn.loc : undefined,
+        };
+    } else {
+        return {
+            type: 'Term',
+            head: syn.head,
+            spine: syn.spine.map(Term),
+            range: range ? syn.range : undefined,
+            loc: loc ? syn.loc : undefined,
+        };
+    }
+}
+
+export function Term(syn: parse.Term): ast.Term {
+    switch (syn.type) {
+        case 'Atom':
+            return TermAtom(syn);
+        case 'Parens':
+            return Term(syn.argument);
+    }
 }
 
 export function PropTrue(syn: ast.PropTrue): ast.PropTrue {
@@ -31,13 +54,14 @@ export function PropFalse(syn: parse.Proposition): ast.PropFalse {
     };
 }
 
-export function Atom(syn: parse.Identifier): ast.Atom {
-    if (!syn.name.match(/^[A-Z]/))
-        throw new ParsingError(syn, 'Atomic propositions must start with an upper case letter');
+export function PropAtom(syn: parse.PropAtom): ast.Atom {
+    if (!syn.head.match(/^[A-Z]/))
+        throw new ParsingError(syn, 'Predicate names must start with an upper case letter');
 
     return {
         type: 'Atom',
-        predicate: syn.name,
+        predicate: syn.head,
+        spine: syn.spine.map(Term),
         range: range ? syn.range : undefined,
         loc: loc ? syn.loc : undefined,
     };
@@ -93,36 +117,39 @@ export function PropNot(syn: parse.UnaryProposition): ast.PropImplies {
     };
 }
 
-export function Sort(id: ast.Identifier): 'nat' | 't' {
-    switch (id.name) {
+export function Sort(loc: ast.SourceLocation, id: string): 'nat' | 't' {
+    switch (id) {
+        // case 'nat':
         case 't':
-        case 'nat':
-            return id.name;
+            return id;
         default:
-            throw new ParsingError(
-                id,
-                'Only `nat` and `t` are allowed as first-order types, not `${id.name}`'
-            );
+            throw new ParsingError(loc, 'Only `t` is allowed as first-order types, not `${id.name}`');
     }
 }
 
 export function PropAll(syn: parse.QuantifiedProposition): ast.PropAll {
+    if (!syn.variable.match(/^[a-z]/))
+        throw new ParsingError(syn, 'Term variables must start with a lower case letter');
+
     return {
         type: 'PropAll',
         variable: syn.variable,
-        sort: Sort(syn.sort),
-        argument: Proposition(syn.argument),
+        sort: Sort(syn.loc, syn.sort),
+        argument: closeProp(Proposition(syn.argument), 0, syn.variable),
         range: range ? syn.range : undefined,
         loc: loc ? syn.loc : undefined,
     };
 }
 
 export function PropExists(syn: parse.QuantifiedProposition): ast.PropExists {
+    if (!syn.variable.match(/^[a-z]/))
+        throw new ParsingError(syn, 'Term variables must start with a lower case letter');
+
     return {
         type: 'PropExists',
         variable: syn.variable,
-        sort: Sort(syn.sort),
-        argument: Proposition(syn.argument),
+        sort: Sort(syn.loc, syn.sort),
+        argument: closeProp(Proposition(syn.argument), 0, syn.variable),
         range: range ? syn.range : undefined,
         loc: loc ? syn.loc : undefined,
     };
@@ -132,8 +159,8 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
     switch (syn.type) {
         case 'Parens':
             return Proposition(syn.argument);
-        case 'Identifier':
-            return Atom(syn);
+        case 'PropAtom':
+            return PropAtom(syn);
         case 'PropTrue':
             return PropTrue(syn);
         case 'PropFalse':

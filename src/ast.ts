@@ -15,9 +15,22 @@ export interface SourceLocation {
     readonly source: string | null;
 }
 
-export interface Identifier extends Syn {
-    readonly type: 'Identifier';
+export type Term = TermAtom | TermVar | TermConst;
+
+export interface TermVar extends Syn {
+    readonly type: 'Var';
+    readonly index: number;
+}
+
+export interface TermConst extends Syn {
+    readonly type: 'Const';
     readonly name: string;
+}
+
+export interface TermAtom extends Syn {
+    readonly type: 'Term';
+    readonly head: string;
+    readonly spine: Term[]; // Length > 0
 }
 
 export type Proposition = PropTrue | PropFalse | Atom | PropAnd | PropImplies | PropOr | PropAll | PropExists;
@@ -33,6 +46,7 @@ export interface PropFalse extends Syn {
 export interface Atom extends Syn {
     readonly type: 'Atom';
     readonly predicate: string;
+    readonly spine: Term[];
 }
 
 export interface PropAnd extends Syn {
@@ -55,36 +69,66 @@ export interface PropOr extends Syn {
 
 export interface PropAll extends Syn {
     readonly type: 'PropAll';
-    readonly variable: Identifier;
+    readonly variable: string;
     readonly sort: 't' | 'nat';
     readonly argument: Proposition;
 }
 
 export interface PropExists extends Syn {
     readonly type: 'PropExists';
-    readonly variable: Identifier;
+    readonly variable: string;
     readonly sort: 't' | 'nat';
     readonly argument: Proposition;
 }
 
-export function propToString(prop: Proposition): string {
+function freshenRelativeTo(sigma: string[], x: string): string {
+    let i = 0;
+    let z = x;
+    while (sigma.some(y => x === y)) {
+        i += 1;
+        z = `${x}${i}`;
+    }
+
+    return z;
+}
+
+export function termToString(sigma: string[], tm: Term): string {
+    switch (tm.type) {
+        case 'Const':
+            return tm.name;
+        case 'Term':
+            return `(${tm.head}${tm.spine.map(tm => ` ${termToString(sigma, tm)}`)})`;
+        case 'Var':
+            return sigma[tm.index];
+    }
+}
+
+export function propToString(sigma: string[], prop: Proposition): string {
     switch (prop.type) {
         case 'PropOr':
-            return `(${propToString(prop.left)} | ${propToString(prop.right)})`;
+            return `(${propToString(sigma, prop.left)} | ${propToString(sigma, prop.right)})`;
         case 'PropAnd':
-            return `(${propToString(prop.left)} & ${propToString(prop.right)})`;
+            return `(${propToString(sigma, prop.left)} & ${propToString(sigma, prop.right)})`;
         case 'PropImplies':
-            return `(${propToString(prop.left)} => ${propToString(prop.right)})`;
+            return `(${propToString(sigma, prop.left)} => ${propToString(sigma, prop.right)})`;
         case 'PropTrue':
             return 'T';
         case 'PropFalse':
             return 'F';
-        case 'PropAll':
-            return `(!${prop.variable}:${prop.sort}.${propToString(prop.argument)})`;
-        case 'PropExists':
-            return `(?${prop.variable}:${prop.sort}.${propToString(prop.argument)})`;
+        case 'PropAll': {
+            const x = freshenRelativeTo(sigma, prop.variable);
+            return `(!${x}:${prop.sort}.${propToString([x].concat(sigma), prop.argument)})`;
+        }
+        case 'PropExists': {
+            const x = freshenRelativeTo(sigma, prop.variable);
+            return `(?${x}:${prop.sort}.${propToString([x].concat(sigma), prop.argument)})`;
+        }
         case 'Atom':
-            return prop.predicate;
+            if (prop.spine.length === 0) {
+                return prop.predicate;
+            } else {
+                return `(${prop.predicate}${prop.spine.map(tm => ` ${termToString(sigma, tm)}`).join()})`;
+            }
         default:
             return prop;
     }

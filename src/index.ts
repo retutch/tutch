@@ -16,13 +16,18 @@ export function parseGrammar(grammar: Grammar, str: string) {
         syn = parser.finish();
     } catch (err) {
         if (!err.token) {
-            throw new ImpossibleError("Error with no token");
+            throw new ImpossibleError('Error with no token');
         } else {
-            throw new ParsingError({ loc: {
-                start: { line: err.token.line, column: err.token.col },
-                end: { line: err.token.line, column: err.token.col + err.token.text.length },
-                source: err.token.text,
-            }}, `Unexpected input ${err.token.text}`);
+            throw new ParsingError(
+                {
+                    loc: {
+                        start: { line: err.token.line, column: err.token.col },
+                        end: { line: err.token.line, column: err.token.col + err.token.text.length },
+                        source: err.token.text,
+                    },
+                },
+                `Unexpected input ${err.token.text}`
+            );
         }
     }
     if (syn.length === 0) {
