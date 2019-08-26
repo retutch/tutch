@@ -15,9 +15,8 @@ export function parseGrammar(grammar: Grammar, str: string) {
         parser.feed(str);
         syn = parser.finish();
     } catch (err) {
-        if (!err.token) {
-            throw new ImpossibleError('Error with no token');
-        } else {
+        /* istanbul ignore else  */
+        if (err.token) {
             throw new ParsingError(
                 {
                     loc: {
@@ -28,12 +27,15 @@ export function parseGrammar(grammar: Grammar, str: string) {
                 },
                 `Unexpected input ${err.token.text}`
             );
+        } else {
+            throw new ImpossibleError('Error with no token');
         }
     }
     if (syn.length === 0) {
         // TODO: Better error message here
         throw new ParsingError({}, `Incomplete parse at the end of the file`);
     }
+    /* istanbul ignore if  */
     if (syn.length !== 1) throw new ImpossibleError(`Ambiguous parse of ${str} (${syn.length} parses)`);
     return syn[0];
 }

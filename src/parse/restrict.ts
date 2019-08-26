@@ -175,6 +175,7 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
                     return PropEquiv(syn);
                 case '|':
                     return PropOr(syn);
+                /* istanbul ignore next */
                 default:
                     return impossible(syn.oper);
             }
@@ -188,10 +189,12 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
                     return PropAll(syn);
                 case '?':
                     return PropExists(syn);
+                /* istanbul ignore next */
                 default:
                     return impossible(syn.oper);
             }
         }
+        /* istanbul ignore next */
         default:
             return impossible(syn);
     }
