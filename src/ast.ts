@@ -147,4 +147,47 @@ export interface Proof extends Syn {
     readonly name: string;
     readonly goal: Proposition;
     readonly proof: ProofStep[];
+    readonly consequent: Proposition; // Must be same as goal
+}
+
+export function equalTerms(a: Term, b: Term): boolean {
+    switch (a.type) {
+        case 'Var':
+            return a.type == b.type && a.index === b.index;
+        case 'Term':
+            return (
+                a.type === b.type &&
+                a.head === b.head &&
+                a.spine.length === b.spine.length &&
+                a.spine.every((tm, i) => equalTerms(tm, b.spine[i]))
+            );
+        case 'Const':
+            return a.type === b.type && a.name === b.name;
+    }
+}
+
+export function equalProps(a: Proposition, b: Proposition): boolean {
+    switch (a.type) {
+        case 'Atom':
+            return (
+                a.type === b.type &&
+                a.predicate === b.predicate &&
+                a.spine.length === b.spine.length &&
+                a.spine.every((tm, i) => equalTerms(tm, b.spine[i]))
+            );
+        case 'PropTrue':
+        case 'PropFalse':
+            return a.type === b.type;
+        case 'PropAnd':
+        case 'PropImplies':
+        case 'PropOr':
+            return a.type === b.type && equalProps(a.left, b.left) && equalProps(a.right, b.right);
+        case 'PropAll':
+            return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
+        case 'PropExists':
+            return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
+        /* istanbul ignore next */
+        default:
+            return impossible(a);
+    }
 }

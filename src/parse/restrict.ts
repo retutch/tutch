@@ -225,12 +225,19 @@ export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
 }
 
 export function Proof(syn: parse.ProofDeclaration): ast.Proof {
+    const goal = Proposition(syn.goal);
+    const proof = syn.steps.map(x => ProofStep(x));
+    const consequent = proof.pop()!;
+    if (consequent.type === "HypotheticalProof" || !ast.equalProps(goal, consequent)) {
+        throw new ParsingError(consequent, 'The last line in a proof must be the proof\'s goal proposition.');
+    }
     return {
         type: 'Proof',
         name: syn.name,
-        goal: Proposition(syn.goal),
-        proof: syn.steps.map(x => ProofStep(x)),
+        goal,
+        proof,
         range: range ? syn.range : undefined,
         loc: loc ? syn.loc : undefined,
+        consequent
     };
 }

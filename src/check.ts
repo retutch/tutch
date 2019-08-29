@@ -1,5 +1,5 @@
-import { Proposition, ProofStep, SourceLocation, Syn, Proof, Term } from './ast';
-import { impossible } from '@calculemus/impossible';
+import { Proposition, ProofStep, SourceLocation, Syn, Proof, equalProps } from './ast';
+import { ImpossibleError, NoJustificationError } from './error';
 
 export type Justification = Justified | NotJustified;
 
@@ -16,16 +16,6 @@ export interface NotJustified extends Syn {
     loc: SourceLocation;
 }
 
-export class NoJustification extends Error {
-    public readonly name: 'NoJustification' = 'NoJustification';
-    loc: SourceLocation | undefined;
-    constructor(msg: string, elem?: Syn | SourceLocation) {
-        super(msg);
-        if (!elem) return;
-        if ('type' in elem) this.loc = elem.loc;
-        else this.loc = elem;
-    }
-}
 
 interface Inference extends Syn {
     type: 'Inference';
@@ -36,48 +26,6 @@ interface Inference extends Syn {
 
 type Hyp = Proposition | Inference;
 type Gamma = Hyp[];
-
-function equalTerms(a: Term, b: Term): boolean {
-    switch (a.type) {
-        case 'Var':
-            return a.type == b.type && a.index === b.index;
-        case 'Term':
-            return (
-                a.type === b.type &&
-                a.head === b.head &&
-                a.spine.length === b.spine.length &&
-                a.spine.every((tm, i) => equalTerms(tm, b.spine[i]))
-            );
-        case 'Const':
-            return a.type === b.type && a.name === b.name;
-    }
-}
-
-function equalProps(a: Proposition, b: Proposition): boolean {
-    switch (a.type) {
-        case 'Atom':
-            return (
-                a.type === b.type &&
-                a.predicate === b.predicate &&
-                a.spine.length === b.spine.length &&
-                a.spine.every((tm, i) => equalTerms(tm, b.spine[i]))
-            );
-        case 'PropTrue':
-        case 'PropFalse':
-            return a.type === b.type;
-        case 'PropAnd':
-        case 'PropImplies':
-        case 'PropOr':
-            return a.type === b.type && equalProps(a.left, b.left) && equalProps(a.right, b.right);
-        case 'PropAll':
-            return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
-        case 'PropExists':
-            return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
-        /* istanbul ignore next */
-        default:
-            return impossible(a);
-    }
-}
 
 function inHyps(a: Proposition, gamma: Gamma): Proposition | null {
     for (let hyp of gamma) {
@@ -103,16 +51,13 @@ function checkProofSteps(gamma: Gamma, steps: ProofStep[]): { justs: Justificati
         gamma.push(hyp);
         return oldJusts.concat(newJusts);
     }, []);
-
-    const proves = steps[steps.length - 1];
-    if (proves.type === 'HypotheticalProof') throw new Error('Syntax');
     return { justs };
 }
 
 function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justification[] } {
     if (step.type === 'HypotheticalProof') {
         // Check a hypothetical proof (multiple steps)
-        if (step.hypotheses.length !== 1) throw new Error();
+        if (step.hypotheses.length !== 1) throw new ImpossibleError('No hypotheses');
         const gamma2 = gamma.slice().concat([step.hypotheses[0]]);
         const { justs } = checkProofSteps(gamma2, step.steps.concat([step.consequent]));
         const hyp: Hyp = {
@@ -294,28 +239,16 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
 }
 
 export function checkProof(proof: Proof): Justification[] {
-    const { justs } = checkProofSteps([], proof.proof);
+    const hyps: Hyp[] = [];
+    const { justs } = checkProofSteps(hyps, proof.proof.concat([ proof.consequent ]));
     const unjustified = justs.filter(({ type }) => type === 'NotJustified');
 
     let goalJust: Justification;
-    const proves = proof.proof[proof.proof.length - 1];
-    if (proves.type === 'HypotheticalProof') {
-        goalJust = {
-            type: 'NotJustified',
-            message: 'Last step in proof is a supposition',
-            loc: proof.goal.loc!,
-        };
-    } else if (!equalProps(proves, proof.goal)) {
-        goalJust = {
-            type: 'NotJustified',
-            message: 'Last step in proof does not match proof goal',
-            loc: proof.goal.loc!,
-        };
-    } else if (unjustified.length === 0) {
+    if (unjustified.length === 0) {
         goalJust = {
             type: 'Justified',
             loc: proof.goal.loc!,
-            by: [proves.loc!],
+            by: [proof.consequent.loc!],
         };
     } else {
         goalJust = {
@@ -333,6 +266,6 @@ export function checkProof(proof: Proof): Justification[] {
 export function assertProof(proof: Proof) {
     const justs = checkProof(proof);
     justs.forEach(just => {
-        if (just.type === 'NotJustified') throw new Error();
+        if (just.type === 'NotJustified') throw new NoJustificationError('', just.loc);
     });
 }

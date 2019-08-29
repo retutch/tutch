@@ -1,4 +1,4 @@
-import { SourceLocation } from './ast';
+import { SourceLocation, Syn } from './ast';
 
 export class IncompleteParseError extends Error {
     public readonly name: 'IncompleteParseError' = 'IncompleteParseError';
@@ -23,3 +23,15 @@ export class ParsingError extends Error {
         this.loc = loc;
     }
 }
+
+export class NoJustificationError extends Error {
+    public readonly name: 'NoJustification' = 'NoJustification';
+    loc: SourceLocation | undefined;
+    constructor(msg: string, elem?: Syn | SourceLocation) {
+        super(msg);
+        if (!elem) return;
+        if ('type' in elem) this.loc = elem.loc;
+        else this.loc = elem;
+    }
+}
+

@@ -1,11 +1,12 @@
 import * as Ast from './ast';
 import { Parser, Grammar } from 'nearley';
-import { checkProof, NoJustification, Justification } from './check';
+import { checkProof, Justification } from './check';
 import { Proof, Proposition } from './parse/restrict';
-import { ImpossibleError, ParsingError } from './error';
+import { ImpossibleError, ParsingError, NoJustificationError } from './error';
 const rules = require('../dist/rules');
 const proposition = require('../dist/proposition');
-export { NoJustification, Justification } from './check';
+export { ImpossibleError, ParsingError } from './error';
+export { Justification } from './check';
 export * from './ast';
 
 export function parseGrammar(grammar: Grammar, str: string) {
@@ -58,6 +59,6 @@ export function evaluate(proofs: Ast.Proof[]): Justification[] {
 
 export function evaluateAssert(proofs: Ast.Proof[]) {
     evaluate(proofs).forEach(just => {
-        if (just.type === 'NotJustified') throw new NoJustification('', just);
+        if (just.type === 'NotJustified') throw new NoJustificationError('', just);
     });
 }
