@@ -1,6 +1,6 @@
 {
     "name": "tutch",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "Typescript implementation of Tutch, a TUTorial proof CHecker.",
     "main": "dist/index.js",
     "types": "dist/index.d.js",
