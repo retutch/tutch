@@ -17,22 +17,10 @@ export interface SourceLocation {
     readonly source: string | null;
 }
 
-export type Term = TermAtom | TermVar | TermConst;
-
-export interface TermVar extends Syn {
-    readonly type: 'Var';
-    readonly index: number;
-}
-
-export interface TermConst extends Syn {
-    readonly type: 'Const';
-    readonly name: string;
-}
-
-export interface TermAtom extends Syn {
+export interface Term extends Syn {
     readonly type: 'Term';
-    readonly head: string;
-    readonly spine: Term[]; // Length > 0
+    readonly head: string | number;
+    readonly spine: Term[];
 }
 
 export type Proposition = PropTrue | PropFalse | Atom | PropAnd | PropImplies | PropOr | PropAll | PropExists;
@@ -94,14 +82,18 @@ function freshenRelativeTo(sigma: string[], x: string): string {
     return z;
 }
 
-export function termToString(sigma: string[], tm: Term): string {
-    switch (tm.type) {
-        case 'Const':
-            return tm.name;
-        case 'Term':
-            return `(${tm.head}${tm.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')})`;
-        case 'Var':
-            return sigma[tm.index];
+export function termToString(sigma: string[], term: Term): string {
+    let head: string;
+    if (typeof term.head === 'string') {
+        head = term.head;
+    } else {
+        head = sigma[term.head];
+    }
+
+    if (term.spine.length === 0) {
+        return head;
+    } else {
+        return `(${term.head}${term.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')})`;
     }
 }
 
@@ -151,19 +143,12 @@ export interface Proof extends Syn {
 }
 
 export function equalTerms(a: Term, b: Term): boolean {
-    switch (a.type) {
-        case 'Var':
-            return a.type == b.type && a.index === b.index;
-        case 'Term':
-            return (
-                a.type === b.type &&
-                a.head === b.head &&
-                a.spine.length === b.spine.length &&
-                a.spine.every((tm, i) => equalTerms(tm, b.spine[i]))
-            );
-        case 'Const':
-            return a.type === b.type && a.name === b.name;
-    }
+    return (
+        a.type === b.type &&
+        a.head === b.head &&
+        a.spine.length === b.spine.length &&
+        a.spine.every((tm, i) => equalTerms(tm, b.spine[i]))
+    );
 }
 
 export function equalProps(a: Proposition, b: Proposition): boolean {

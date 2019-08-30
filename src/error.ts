@@ -34,4 +34,3 @@ export class NoJustificationError extends Error {
         else this.loc = elem;
     }
 }
-

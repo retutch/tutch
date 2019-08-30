@@ -7,25 +7,16 @@ import { closeProp } from '../substitution';
 let range = true;
 let loc = true;
 
-export function TermAtom(syn: parse.TermAtom): ast.TermAtom | ast.TermConst {
+export function TermAtom(syn: parse.TermAtom): ast.Term {
     if (!syn.head.match(/^[a-z]/))
         throw new ParsingError(syn, 'Term variables and constants must start with a lower case letter');
 
-    if (syn.spine.length === 0) {
-        return {
-            type: 'Const',
-            name: syn.head,
-            range: range ? syn.range : undefined,
-            loc: loc ? syn.loc : undefined,
-        };
-    } else {
-        return {
-            type: 'Term',
-            head: syn.head,
-            spine: syn.spine.map(Term),
-            range: range ? syn.range : undefined,
-            loc: loc ? syn.loc : undefined,
-        };
+    return {
+        type: 'Term',
+        head: syn.head,
+        spine: syn.spine.map(Term),
+        range: range ? syn.range : undefined,
+        loc: loc ? syn.loc : undefined,    
     }
 }
 
@@ -228,8 +219,8 @@ export function Proof(syn: parse.ProofDeclaration): ast.Proof {
     const goal = Proposition(syn.goal);
     const proof = syn.steps.map(x => ProofStep(x));
     const consequent = proof.pop()!;
-    if (consequent.type === "HypotheticalProof" || !ast.equalProps(goal, consequent)) {
-        throw new ParsingError(consequent, 'The last line in a proof must be the proof\'s goal proposition.');
+    if (consequent.type === 'HypotheticalProof' || !ast.equalProps(goal, consequent)) {
+        throw new ParsingError(consequent, "The last line in a proof must be the proof's goal proposition.");
     }
     return {
         type: 'Proof',
@@ -238,6 +229,6 @@ export function Proof(syn: parse.ProofDeclaration): ast.Proof {
         proof,
         range: range ? syn.range : undefined,
         loc: loc ? syn.loc : undefined,
-        consequent
+        consequent,
     };
 }

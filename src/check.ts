@@ -16,7 +16,6 @@ export interface NotJustified extends Syn {
     loc: SourceLocation;
 }
 
-
 interface Inference extends Syn {
     type: 'Inference';
     premise: Proposition;
@@ -240,7 +239,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
 
 export function checkProof(proof: Proof): Justification[] {
     const hyps: Hyp[] = [];
-    const { justs } = checkProofSteps(hyps, proof.proof.concat([ proof.consequent ]));
+    const { justs } = checkProofSteps(hyps, proof.proof.concat([proof.consequent]));
     const unjustified = justs.filter(({ type }) => type === 'NotJustified');
 
     let goalJust: Justification;

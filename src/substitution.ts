@@ -1,29 +1,18 @@
 import * as Ast from './ast';
-import { ParsingError } from './error';
 import { impossible } from '@calculemus/impossible';
 
-export function closeTerm(t: Ast.Term, i: number, x: string): Ast.Term {
-    switch (t.type) {
-        case 'Term':
-            if (t.head === x) {
-                throw new ParsingError(t, `The bound variable ${t.head} can't be given arguments.`);
-            } else {
-                return { type: 'Term', head: t.head, spine: t.spine.map(tm => closeTerm(tm, i, x)) };
-            }
-        case 'Const':
-            if (t.name === x) {
-                return { type: 'Var', index: i, range: t.range, loc: t.loc };
-            } else {
-                return t;
-            }
-        case 'Var':
-            // XXX: This assumes we will _always_ be closing the outermost binder
-            // (i.e. during parsing) and will NEVER need to update de bruijn indices.
-            // This may need to be revisited!
-            return t;
-        /* istanbul ignore next */
-        default:
-            return impossible(t);
+export function closeTerm(term: Ast.Term, i: number, x: string): Ast.Term {
+    let head: number | string;
+    if (term.head === x) {
+        head = i;
+    } else {
+        head = term.head;
+    }
+
+    return {
+        type: 'Term',
+        head,
+        spine: term.spine.map(tm => closeTerm(tm, i, x)),
     }
 }
 
