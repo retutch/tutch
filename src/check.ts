@@ -64,6 +64,7 @@ function generalizationInHyps(consequent: Proposition, gamma: Gamma): Inference 
     return null;
 }
 
+
 function checkProofSteps(gamma: Gamma, steps: ProofStep[]): { justs: Justification[] } {
     const justs = steps.reduce((oldJusts: Justification[], step) => {
         const { hyp, justs: newJusts } = checkProofStep(gamma, step);
@@ -207,7 +208,34 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
 
         // Check for elimination rules
         for (let hyp of gamma) {
-            if (hyp.type !== 'Inference' && hyp.type !== 'VariableDeclaration') {
+            if (hyp.type === 'Inference') {
+                if (hyp.premises.length === 2) {
+                    const variableDeclaration = hyp.premises[0];
+                    const proposition = hyp.premises[1];
+                    if (variableDeclaration.type === 'VariableDeclaration' && proposition.type !== 'VariableDeclaration') {
+                        if (equalProps(step, hyp.conclusion)) {
+                            // Possible use of existential! But is the existential there?
+                            const existential = inHyps({
+                                type: 'PropExists',
+                                variable: variableDeclaration.variable,
+                                sort: variableDeclaration.sort,
+                                argument: proposition,
+                            }, gamma);
+
+                            if (existential) {
+                                return {
+                                    hyp: step,
+                                    justs: [{
+                                        type: 'Justified',
+                                        loc: step.loc!,
+                                        by: [existential.loc!, hyp.loc],
+                                    }]
+                                };
+                            }
+                        }
+                    }
+                }
+            } else if (hyp.type !== 'VariableDeclaration') {
                 if (equalProps(step, hyp))
                     return {
                         hyp: step,

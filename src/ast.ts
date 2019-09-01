@@ -184,7 +184,7 @@ export type ProofStep = Proposition | HypotheticalProof;
 export interface VariableDeclaration extends Syn {
     readonly type: 'VariableDeclaration';
     readonly variable: string;
-    readonly sort: string;
+    readonly sort: 't';
 }
 
 export type Hypothesis = Proposition | VariableDeclaration;

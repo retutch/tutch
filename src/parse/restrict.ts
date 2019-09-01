@@ -194,14 +194,24 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
 
 export function Hypothesis(syn: parse.Hypothesis): ast.Hypothesis {
     switch (syn.type) {
-        case 'VariableDeclaration':
+        case 'VariableDeclaration': {
+            let sort: 't';
+            switch (syn.sort) {
+                case null:
+                case 't':
+                    sort = 't';
+                    break;
+                default:
+                    throw new ParsingError(syn, `Only \`t\` is allowed as a first-order type, not ${syn.sort}`);
+            }
             return {
                 type: 'VariableDeclaration',
                 variable: syn.variable,
-                sort: syn.sort || 't',
+                sort: sort,
                 range: range ? syn.range : undefined,
                 loc: loc ? syn.loc : undefined,
             };
+        }
         default:
             return Proposition(syn);
     }
