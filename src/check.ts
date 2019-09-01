@@ -1,5 +1,6 @@
-import { Proposition, ProofStep, SourceLocation, Syn, Proof, equalProps } from './ast';
+import { Proposition, ProofStep, SourceLocation, Syn, Proof, equalProps, Hypothesis } from './ast';
 import { ImpossibleError, NoJustificationError } from './error';
+import { openProp, openProofStep } from './substitution';
 
 export type Justification = Justified | NotJustified;
 
@@ -18,17 +19,17 @@ export interface NotJustified extends Syn {
 
 interface Inference extends Syn {
     type: 'Inference';
-    premise: Proposition;
+    premises: Hypothesis[];
     conclusion: Proposition;
     loc: SourceLocation;
 }
 
-type Hyp = Proposition | Inference;
+type Hyp = Hypothesis | Inference;
 type Gamma = Hyp[];
 
 function inHyps(a: Proposition, gamma: Gamma): Proposition | null {
     for (let hyp of gamma) {
-        if (hyp.type !== 'Inference') {
+        if (hyp.type !== 'Inference' && hyp.type !== 'VariableDeclaration') {
             if (equalProps(a, hyp)) return hyp;
         }
     }
@@ -37,8 +38,27 @@ function inHyps(a: Proposition, gamma: Gamma): Proposition | null {
 
 function implicationInHyps(premise: Proposition, consequent: Proposition, gamma: Gamma): Inference | null {
     for (let hyp of gamma) {
-        if (hyp.type === 'Inference') {
-            if (equalProps(premise, hyp.premise) && equalProps(consequent, hyp.conclusion)) return hyp;
+        if (hyp.type === 'Inference' && hyp.premises.length === 1) {
+            const premiseInHyp = hyp.premises[0];
+            if (premiseInHyp.type !== 'VariableDeclaration') {
+                if (equalProps(premise, premiseInHyp) && equalProps(consequent, hyp.conclusion)) {
+                    return hyp;
+                }
+            }
+        }
+    }
+    return null;
+}
+
+function generalizationInHyps(consequent: Proposition, gamma: Gamma): Inference | null {
+    for (let hyp of gamma) {
+        if (hyp.type === 'Inference' && hyp.premises.length === 1) {
+            const premiseInHyp = hyp.premises[0];
+            if (premiseInHyp.type === 'VariableDeclaration') {
+                if (equalProps(consequent, hyp.conclusion)) {
+                    return hyp;
+                }
+            }
         }
     }
     return null;
@@ -53,15 +73,48 @@ function checkProofSteps(gamma: Gamma, steps: ProofStep[]): { justs: Justificati
     return { justs };
 }
 
+function freshRelativeTo(gamma: Gamma, x: string) {
+    function inGamma(y: string) {
+        return gamma.some(hyp => hyp.type === 'VariableDeclaration' && hyp.variable == y);
+    }
+    if (!inGamma(x)) return x;
+    let i = 0;
+    while (inGamma(`${x}${i}`)) i++;
+    return `${x}${i}`;
+}
+
 function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justification[] } {
     if (step.type === 'HypotheticalProof') {
         // Check a hypothetical proof (multiple steps)
-        if (step.hypotheses.length !== 1) throw new ImpossibleError('No hypotheses');
-        const gamma2 = gamma.slice().concat([step.hypotheses[0]]);
-        const { justs } = checkProofSteps(gamma2, step.steps.concat([step.consequent]));
+        if (step.hypotheses.length === 0) throw new ImpossibleError('No hypotheses');
+
+        const closedHyps = step.hypotheses.slice();
+        const openHyps = [];
+        let steps = step.steps.slice();
+        let consequent = step.consequent;
+        for (let i = 0; i < step.hypotheses.length; i++) {
+            const hyp = closedHyps[i];
+            openHyps.push(hyp);
+            if (hyp.type === 'VariableDeclaration') {
+                const x = freshRelativeTo(gamma, hyp.variable);
+                let k = 0;
+                for (let j = i + 1; j < step.hypotheses.length; j++) {
+                    if (closedHyps[j].type === 'VariableDeclaration') {
+                        k++;
+                    } else {
+                        closedHyps[j] = openProp(closedHyps[j] as Proposition, k, x);
+                    }
+                }
+                steps = steps.map(step => openProofStep(step, k, x));
+                consequent = openProp(consequent, k, x);
+            }
+        }
+
+        const gamma2 = gamma.slice().concat(closedHyps);
+        const { justs } = checkProofSteps(gamma2, steps.concat([consequent]));
         const hyp: Hyp = {
             type: 'Inference',
-            premise: step.hypotheses[0],
+            premises: step.hypotheses,
             conclusion: step.consequent,
             loc: step.loc!,
         };
@@ -134,11 +187,27 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                     };
                 break;
             }
+            case 'PropAll': {
+                const premise = generalizationInHyps(step.argument, gamma);
+                if (premise)
+                    return {
+                        hyp: step,
+                        justs: [
+                            {
+                                type: 'Justified',
+                                rule: 'universal quantification introduction',
+                                loc: step.loc!,
+                                by: [premise.loc],
+                            },
+                        ],
+                    };
+                break;
+            }
         }
 
         // Check for elimination rules
         for (let hyp of gamma) {
-            if (hyp.type !== 'Inference') {
+            if (hyp.type !== 'Inference' && hyp.type !== 'VariableDeclaration') {
                 if (equalProps(step, hyp))
                     return {
                         hyp: step,

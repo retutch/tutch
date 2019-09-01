@@ -2,7 +2,7 @@ import * as ast from '../ast';
 import * as parse from './parse';
 import { impossible } from '@calculemus/impossible';
 import { ParsingError } from '../error';
-import { closeProp } from '../substitution';
+import { closeProp, closeProofStep } from '../substitution';
 
 let range = true;
 let loc = true;
@@ -16,8 +16,8 @@ export function TermAtom(syn: parse.TermAtom): ast.Term {
         head: syn.head,
         spine: syn.spine.map(Term),
         range: range ? syn.range : undefined,
-        loc: loc ? syn.loc : undefined,    
-    }
+        loc: loc ? syn.loc : undefined,
+    };
 }
 
 export function Term(syn: parse.Term): ast.Term {
@@ -108,11 +108,12 @@ export function PropNot(syn: parse.UnaryProposition): ast.PropImplies {
     };
 }
 
-export function Sort(loc: ast.SourceLocation, id: string): 'nat' | 't' {
+export function Sort(loc: ast.SourceLocation, id: string | null): 'nat' | 't' {
     switch (id) {
         // case 'nat':
+        case null:
         case 't':
-            return id;
+            return 't';
         default:
             throw new ParsingError(loc, `Only \`t\` is allowed as a first-order type, not ${id}`);
     }
@@ -191,20 +192,56 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
     }
 }
 
+export function Hypothesis(syn: parse.Hypothesis): ast.Hypothesis {
+    switch (syn.type) {
+        case 'VariableDeclaration':
+            return {
+                type: 'VariableDeclaration',
+                variable: syn.variable,
+                sort: syn.sort || 't',
+                range: range ? syn.range : undefined,
+                loc: loc ? syn.loc : undefined,
+            };
+        default:
+            return Proposition(syn);
+    }
+}
+
 export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
     switch (syn.type) {
         case 'HypotheticalProof':
-            const steps = syn.steps.map(ProofStep);
+            const hypotheses = syn.hypotheses.map(Hypothesis);
+            let steps = syn.steps.map(ProofStep);
             if (steps.length === 0) throw new ParsingError(syn, 'Hypothetical proof has zero steps');
-            const consequent = steps.pop()!;
+            let consequent = steps.pop()!;
             if (consequent.type === 'HypotheticalProof')
                 throw new ParsingError(
                     consequent,
                     'Hypothetical proof [...] must end with a proposition, not another hypothetical sequence.'
                 );
+
+            let k = 0;
+            for (let i = hypotheses.length - 1; i >= 0; i--) {
+                const hypothesis = hypotheses[i];
+                if (hypothesis.type === 'VariableDeclaration') {
+                    for (let j = i + 1; j < hypotheses.length; j++) {
+                        if (hypotheses[j].type !== 'VariableDeclaration') {
+                            hypotheses[j] = closeProp(
+                                hypotheses[j] as ast.Proposition,
+                                k,
+                                hypothesis.variable
+                            );
+                        }
+                    }
+                    steps = steps.map(step => closeProofStep(step, k, hypothesis.variable));
+                    consequent = closeProp(consequent, k, hypothesis.variable);
+                    k++;
+                }
+            }
+
             return {
                 type: 'HypotheticalProof',
-                hypotheses: syn.hypotheses.map(Proposition),
+                hypotheses,
                 steps,
                 consequent,
                 range: range ? syn.range : undefined,

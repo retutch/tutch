@@ -7,7 +7,10 @@ ProofDeclaration -> "proof" _ %ident _ ":" _ Prop _ "=" _ "begin" _ ProofSequenc
                                                   {% util.ProofDeclaration %}
 
 ProofSequence -> (ProofStep _ ";" _):* ProofStep  {% util.ProofSequence %}
-Hypotheses -> (Prop _ "," _):* Prop               {% util.Hypotheses %}
+Hypothesis -> Prop                                {% id %}
+            | "Let" _ %ident (_ ":" _ %ident):?   {% util.LetHyp %}
+            | %ident _ ":" _ %ident               {% util.TypeHyp %}
+Hypotheses -> (Hypothesis _ "," _):* Hypothesis   {% util.Hypotheses %}
 
 ProofStep -> Prop                                 {% id %}
            | "[" _ Hypotheses _ (";" _ ProofStep _):+ "]"

@@ -49,6 +49,8 @@ export const lexer: Lexer = states(
                         'eqENC',
                         'eqECN',
                         'eqECC',
+                        'Let',
+                        'Suppose',
                     ],
                 }),
             },

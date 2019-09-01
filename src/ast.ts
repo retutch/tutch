@@ -125,11 +125,60 @@ export function propToString(sigma: string[], prop: Proposition): string {
     }
 }
 
+export function termToStringDebug(term: Term): string {
+    let head: string;
+    if (typeof term.head === 'string') {
+        head = term.head;
+    } else {
+        head = `#${term.head}`;
+    }
+
+    if (term.spine.length === 0) {
+        return head;
+    } else {
+        return `(${term.head}${term.spine.map(tm => ` ${termToStringDebug(tm)}`).join('')})`;
+    }
+}
+
+export function propToStringDebug(prop: Proposition): string {
+    switch (prop.type) {
+        case 'PropOr':
+            return `(${propToStringDebug(prop.left)} | ${propToStringDebug(prop.right)})`;
+        case 'PropAnd':
+            return `(${propToStringDebug(prop.left)} & ${propToStringDebug(prop.right)})`;
+        case 'PropImplies':
+            return `(${propToStringDebug(prop.left)} => ${propToStringDebug(prop.right)})`;
+        case 'PropTrue':
+            return 'T';
+        case 'PropFalse':
+            return 'F';
+        case 'PropAll': {
+            return `(!${prop.variable}:${prop.sort}.${propToStringDebug(prop.argument)})`;
+        }
+        case 'PropExists': {
+            return `(?${prop.variable}:${prop.sort}.${propToStringDebug(prop.argument)})`;
+        }
+        case 'Atom':
+            return `${prop.predicate}${prop.spine.map(tm => ` ${termToStringDebug(tm)}`).join('')}`;
+        /* istanbul ignore next */
+        default:
+            return impossible(prop);
+    }
+}
+
 export type ProofStep = Proposition | HypotheticalProof;
+
+export interface VariableDeclaration extends Syn {
+    readonly type: 'VariableDeclaration';
+    readonly variable: string;
+    readonly sort: string;
+}
+
+export type Hypothesis = Proposition | VariableDeclaration;
 
 export interface HypotheticalProof extends Syn {
     readonly type: 'HypotheticalProof';
-    hypotheses: Proposition[];
+    hypotheses: Hypothesis[];
     steps: ProofStep[];
     consequent: Proposition;
 }
@@ -176,3 +225,33 @@ export function equalProps(a: Proposition, b: Proposition): boolean {
             return impossible(a);
     }
 }
+
+/*
+export interface Cell { match: null | Term }
+
+export function matchTerm(closed: Term, open: Term, cell: Cell): boolean {
+    if (open.head === 0) {
+        if (cell.match === null) {
+            cell.match = closed;
+            return true;
+        } else {
+            return equalTerms(closed, cell.match);
+        }
+    } else if (typeof closed.head === 'number' && typeof open.head === 'number') {
+        return closed.head === open.head + 1;
+    } else if (typeof closed.head === 'string' && typeof open.head === 'string') {
+        if (closed.head !== open.head || closed.spine.length !== open.spine.length) {
+            return false;
+        } else {
+            const matches = 
+        }
+    }
+    if (typeof closed.head === 'number' && typeof closed.open === 'number') {
+
+    }
+}
+
+export function matchProps(closed: Proposition, open: Proposition): boolean | Term {
+
+}
+*/

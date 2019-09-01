@@ -29,6 +29,7 @@ export function parseGrammar(grammar: Grammar, str: string) {
                 `Unexpected input ${err.token.text}`
             );
         } else {
+            console.log(err);
             throw new ImpossibleError('Error with no token');
         }
     }

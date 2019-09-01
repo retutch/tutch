@@ -4,72 +4,49 @@ import { parseProp } from '..';
 import * as Ast from '../ast';
 
 function parsePrint(str: string) {
-    return Ast.propToString([], parseProp(str));
+    return Ast.propToStringDebug(parseProp(str));
+}
+
+function itShouldRejectWithParsingError(str: string) {
+    it(`should correctly reject '${str}' as a proposition`, () => {
+        expect(() => parseProp(str))
+            .to.throw()
+            .that.has.property('name')
+            .that.equals('ParsingError');
+    });
+}
+
+function itShouldParseAndPrint(input: string, output: string) {
+    it(`should parse and print '${input}' as '${output}'`, () => {
+        expect(parsePrint(input)).to.equal(output);
+    });
 }
 
 describe('The proposition parser', () => {
-    it('should correctly reject bad propositions', () => {
-        expect(() => parseProp(''))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('('))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('☄'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('lower & Upper'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('Upper & lower'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('!x:custom. A'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('nat => A'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('A & let'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('!A:t. B'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('?A:t. B'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('A x y & B y C'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-        expect(() => parseProp('A B'))
-            .to.throw()
-            .that.has.property('name')
-            .that.equals('ParsingError');
-    });
+    itShouldRejectWithParsingError('');
+    itShouldRejectWithParsingError('(');
+    itShouldRejectWithParsingError(')');
+    itShouldRejectWithParsingError('☄');
+    itShouldRejectWithParsingError('lower & Upper');
+    itShouldRejectWithParsingError('Upper & lower');
+    itShouldRejectWithParsingError('!x:custom.A');
+    itShouldRejectWithParsingError('nat => A');
+    itShouldRejectWithParsingError('A & let');
+    itShouldRejectWithParsingError('!A:t. B');
+    itShouldRejectWithParsingError('?A:t. B');
+    itShouldRejectWithParsingError('A x y & B y C');
+    itShouldRejectWithParsingError('A B');
 
-    it('should parse precedence correctly', () => {
-        expect(parsePrint('A x y z')).to.equal('A x y z');
-        expect(parsePrint('A => B')).to.equal('(A => B)');
-        expect(parsePrint('A => B => C')).to.equal('(A => (B => C))');
-        expect(parsePrint('A & B => C & D')).to.equal('((A & B) => (C & D))');
-        expect(parsePrint('A & !a:t. B & C')).to.equal('(A & (!a:t.(B & C)))');
-        expect(parsePrint('A => !a:t. B & C')).to.equal('(A => (!a:t.(B & C)))');
-        expect(parsePrint('A & !a:t. B => C')).to.equal('(A & (!a:t.(B => C)))');
-        expect(parsePrint('A | ?a:t. B => C')).to.equal('(A | (?a:t.(B => C)))');
-        expect(parsePrint('A => ?a:t. B | C')).to.equal('(A => (?a:t.(B | C)))');
-        expect(parsePrint('F => ?a:t. B a | C b')).to.equal('(F => (?a:t.(B a | C b)))');
-        expect(parsePrint('T => !b:t. B a | C b')).to.equal('(T => (!b:t.(B a | C b)))');
-    });
+    itShouldParseAndPrint('A x y z', 'A x y z');
+    itShouldParseAndPrint('A => B', '(A => B)');
+    itShouldParseAndPrint('A => B => C', '(A => (B => C))');
+    itShouldParseAndPrint('A & B => C & D', '((A & B) => (C & D))');
+    itShouldParseAndPrint('A & !a:t. B & C', '(A & (!a:t.(B & C)))');
+    itShouldParseAndPrint('A => !a:t. B & C', '(A => (!a:t.(B & C)))');
+    itShouldParseAndPrint('A & !a:t. B => C', '(A & (!a:t.(B => C)))');
+    itShouldParseAndPrint('A | ?a:t. B => C', '(A | (?a:t.(B => C)))');
+    itShouldParseAndPrint('A => ?a:t. B | C', '(A => (?a:t.(B | C)))');
+    itShouldParseAndPrint('F => ?a:t. B a | C b', '(F => (?a:t.(B #0 | C b)))');
+    itShouldParseAndPrint('T => !b:t. B a | C b', '(T => (!b:t.(B a | C #0)))');
+    itShouldParseAndPrint('!a. ?b. A a b c', '(!a:t.(?b:t.A #1 #0 c))');
 });

@@ -197,7 +197,7 @@ export interface QuantifiedProposition extends Syn {
     type: 'QuantifiedProposition';
     oper: '!' | '?';
     variable: string;
-    sort: string;
+    sort: string | null;
     argument: Proposition;
 }
 
@@ -206,10 +206,7 @@ type QuantifiedPropositionArg = [
     WS,
     Token, // variable name
     WS,
-    Token, // :
-    WS,
-    Token, // sort name
-    WS,
+    [Token, WS, Token, WS] | null, // : t
     Token, // .
     WS,
     Proposition
@@ -219,14 +216,12 @@ export function QuantifiedProposition([
     ,
     x,
     ,
-    ,
-    ,
     ty,
-    ,
     ,
     ,
     argument,
 ]: QuantifiedPropositionArg): QuantifiedProposition {
+    const sort: string | null = ty ? ty[2].text : null;
     switch (oper.text) {
         case '!':
         case '?':
@@ -238,7 +233,7 @@ export function QuantifiedProposition([
         type: 'QuantifiedProposition',
         oper: oper.text,
         variable: x.text,
-        sort: ty.text,
+        sort,
         argument,
         range: [oper.offset, argument.range[1]],
         loc: locloc(tokloc(oper), argument.loc),
@@ -249,12 +244,43 @@ export type ProofStep = Proposition | HypotheticalProof;
 
 export interface HypotheticalProof extends Syn {
     type: 'HypotheticalProof';
-    hypotheses: Proposition[];
+    hypotheses: Hypothesis[];
     steps: ProofStep[];
 }
 
-type HypotheticalProofArg = [Token, WS, Proposition[], WS, [Token, WS, ProofStep, WS][], Token];
-export function HypotheticalProof([l, , hypotheses, , steps, r]: HypotheticalProofArg) {
+export type Hypothesis = Proposition | VariableDeclaration;
+
+export interface VariableDeclaration extends Syn {
+    type: 'VariableDeclaration';
+    variable: string;
+    sort: string | null;
+}
+
+export function LetHyp([l, , x, s]: [Token, WS, Token, null | [WS, Token, WS, Token]]): VariableDeclaration {
+    const rightRange = s ? s[3].offset + s[3].text.length : x.offset + x.text.length;
+    const rightLoc = s ? tokloc(s[3]) : tokloc(x);
+
+    return {
+        type: 'VariableDeclaration',
+        variable: x.text,
+        sort: s ? s[3].text : null,
+        range: [l.offset, rightRange],
+        loc: locloc(tokloc(l), rightLoc),
+    };
+}
+
+export function TypeHyp([x, , , , t]: [Token, WS, Token, WS, Token]): VariableDeclaration {
+    return {
+        type: 'VariableDeclaration',
+        variable: x.text,
+        sort: t.text,
+        range: [x.offset, t.offset + t.text.length],
+        loc: locloc(tokloc(x), tokloc(t)),
+    };
+}
+
+type HypotheticalProofArg = [Token, WS, Hypothesis[], WS, [Token, WS, ProofStep, WS][], Token];
+export function HypotheticalProof([l, , hypotheses, , steps, r]: HypotheticalProofArg): HypotheticalProof {
     return {
         type: 'HypotheticalProof',
         hypotheses,
