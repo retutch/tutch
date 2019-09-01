@@ -50,6 +50,17 @@ function implicationInHyps(premise: Proposition, consequent: Proposition, gamma:
     return null;
 }
 
+function instantiationInHyps(prop: Proposition, gamma: Gamma): Proposition | null {
+    for (let hyp of gamma) {
+        if (hyp.type !== 'Inference' && hyp.type !== 'VariableDeclaration') {
+            if (matchProp(hyp, prop, { contents: null }, 0)) {
+                return hyp;
+            }
+        }
+    }
+    return null;
+}
+
 function generalizationInHyps(prop: Proposition, gamma: Gamma): Inference | null {
     for (let hyp of gamma) {
         if (hyp.type === 'Inference' && hyp.premises.length === 1) {
@@ -203,6 +214,22 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                     };
                 break;
             }
+            case 'PropExists': {
+                const instantiation = instantiationInHyps(step.argument, gamma);
+                if (instantiation) {
+                    return {
+                        hyp: step,
+                        justs: [
+                            {
+                                type: 'Justified',
+                                rule: 'existential quantification introduction',
+                                loc: step.loc!,
+                                by: [instantiation.loc!],
+                            }
+                        ]
+                    }
+                }
+            }
         }
 
         // Check for elimination rules
@@ -233,6 +260,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                                     justs: [
                                         {
                                             type: 'Justified',
+                                            rule: 'existential quantifier elimination',                                            
                                             loc: step.loc!,
                                             by: [existential.loc!, hyp.loc],
                                         },
@@ -318,7 +346,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                             justs: [
                                 {
                                     type: 'Justified',
-                                    rule: 'OrE',
+                                    rule: 'disjunction elimination',
                                     loc: step.loc!,
                                     by: [hyp.loc!, case1.loc, case2.loc],
                                 },
@@ -333,7 +361,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                             justs: [
                                 {
                                     type: 'Justified',
-                                    rule: 'forallE',
+                                    rule: 'universial quantification elimination',
                                     loc: step.loc!,
                                     by: [hyp.loc!]
                                 }
