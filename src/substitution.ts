@@ -216,6 +216,7 @@ export function matchTerm(closedTerm: Ast.Term, openTerm: Ast.Term, cell: Cell, 
                 closedTerm.spine.length === openTerm.spine.length && // And the same arguments
                 closedTerm.spine.every((tm, i) => matchTerm(tm, openTerm.spine[i], cell, index))
             );
+        /* istanbul ignore next */
         default:
             throw impossible(openTerm);
     }
@@ -248,6 +249,7 @@ export function matchProp(
         case 'PropTrue':
         case 'PropFalse':
             return closed.type === open.type;
+        /* istanbul ignore next */
         default:
             throw impossible(open);
     }
