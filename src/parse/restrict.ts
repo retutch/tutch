@@ -202,7 +202,10 @@ export function Hypothesis(syn: parse.Hypothesis): ast.Hypothesis {
                     sort = 't';
                     break;
                 default:
-                    throw new ParsingError(syn, `Only \`t\` is allowed as a first-order type, not ${syn.sort}`);
+                    throw new ParsingError(
+                        syn,
+                        `Only \`t\` is allowed as a first-order type, not ${syn.sort}`
+                    );
             }
             return {
                 type: 'VariableDeclaration',

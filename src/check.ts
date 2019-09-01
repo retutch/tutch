@@ -1,6 +1,6 @@
 import { Proposition, ProofStep, SourceLocation, Syn, Proof, equalProps, Hypothesis } from './ast';
 import { ImpossibleError, NoJustificationError } from './error';
-import { openProp, openProofStep } from './substitution';
+import { openProp, openProofStep, matchProp } from './substitution';
 
 export type Justification = Justified | NotJustified;
 
@@ -50,12 +50,12 @@ function implicationInHyps(premise: Proposition, consequent: Proposition, gamma:
     return null;
 }
 
-function generalizationInHyps(consequent: Proposition, gamma: Gamma): Inference | null {
+function generalizationInHyps(prop: Proposition, gamma: Gamma): Inference | null {
     for (let hyp of gamma) {
         if (hyp.type === 'Inference' && hyp.premises.length === 1) {
             const premiseInHyp = hyp.premises[0];
             if (premiseInHyp.type === 'VariableDeclaration') {
-                if (equalProps(consequent, hyp.conclusion)) {
+                if (equalProps(prop, hyp.conclusion)) {
                     return hyp;
                 }
             }
@@ -63,7 +63,6 @@ function generalizationInHyps(consequent: Proposition, gamma: Gamma): Inference 
     }
     return null;
 }
-
 
 function checkProofSteps(gamma: Gamma, steps: ProofStep[]): { justs: Justification[] } {
     const justs = steps.reduce((oldJusts: Justification[], step) => {
@@ -212,24 +211,32 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                 if (hyp.premises.length === 2) {
                     const variableDeclaration = hyp.premises[0];
                     const proposition = hyp.premises[1];
-                    if (variableDeclaration.type === 'VariableDeclaration' && proposition.type !== 'VariableDeclaration') {
+                    if (
+                        variableDeclaration.type === 'VariableDeclaration' &&
+                        proposition.type !== 'VariableDeclaration'
+                    ) {
                         if (equalProps(step, hyp.conclusion)) {
                             // Possible use of existential! But is the existential there?
-                            const existential = inHyps({
-                                type: 'PropExists',
-                                variable: variableDeclaration.variable,
-                                sort: variableDeclaration.sort,
-                                argument: proposition,
-                            }, gamma);
+                            const existential = inHyps(
+                                {
+                                    type: 'PropExists',
+                                    variable: variableDeclaration.variable,
+                                    sort: variableDeclaration.sort,
+                                    argument: proposition,
+                                },
+                                gamma
+                            );
 
                             if (existential) {
                                 return {
                                     hyp: step,
-                                    justs: [{
-                                        type: 'Justified',
-                                        loc: step.loc!,
-                                        by: [existential.loc!, hyp.loc],
-                                    }]
+                                    justs: [
+                                        {
+                                            type: 'Justified',
+                                            loc: step.loc!,
+                                            by: [existential.loc!, hyp.loc],
+                                        },
+                                    ],
                                 };
                             }
                         }
@@ -318,7 +325,22 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                             ],
                         };
                     }
-                }
+                } else if (hyp.type === 'PropAll') {
+                    const openTerm = hyp.argument;
+                    if (matchProp(step, openTerm, {contents:null}, 0)) {
+                        return {
+                            hyp: step,
+                            justs: [
+                                {
+                                    type: 'Justified',
+                                    rule: 'forallE',
+                                    loc: step.loc!,
+                                    by: [hyp.loc!]
+                                }
+                            ]
+                        }
+                    }
+                } // forall
             }
         }
 

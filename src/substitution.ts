@@ -10,7 +10,7 @@ export function openTerm(term: Ast.Term, index: number, x: string): Ast.Term {
                     type: 'TermConst',
                     head: x,
                     spine: [],
-                }
+                };
             } else {
                 return term;
             }
@@ -20,7 +20,7 @@ export function openTerm(term: Ast.Term, index: number, x: string): Ast.Term {
                 type: 'TermConst',
                 head: term.head,
                 spine: term.spine.map(term => openTerm(term, index, x)),
-            };            
+            };
         }
         default: {
             throw impossible(term);
@@ -100,7 +100,10 @@ export function closeTerm(term: Ast.Term, index: number, x: string): Ast.Term {
         case 'TermConst': {
             if (term.head === x) {
                 if (term.spine.length > 0) {
-                    throw new ParsingError(term, `Bound variable '${term.head}' cannot have arguments applied to it.`);
+                    throw new ParsingError(
+                        term,
+                        `Bound variable '${term.head}' cannot have arguments applied to it.`
+                    );
                 } else {
                     return {
                         type: 'TermVar',
@@ -112,7 +115,7 @@ export function closeTerm(term: Ast.Term, index: number, x: string): Ast.Term {
                     type: 'TermConst',
                     head: term.head,
                     spine: term.spine.map(term => closeTerm(term, index, x)),
-                }
+                };
             }
         }
         /* istanbul ignore next */
@@ -183,5 +186,69 @@ export function closeProofStep(step: Ast.ProofStep, i: number, x: string): Ast.P
         };
     } else {
         return closeProp(step, i, x);
+    }
+}
+
+export interface Cell {
+    contents: null | Ast.Term;
+}
+
+export function matchTerm(closedTerm: Ast.Term, openTerm: Ast.Term, cell: Cell, index: number): boolean {
+    switch (openTerm.type) {
+        case 'TermVar':
+            if (openTerm.index === index) {
+                if (cell.contents === null) {
+                    // XXX - occurs check - need to check closedTerm is closed
+                    cell.contents = closedTerm;
+                    return true;
+                } else {
+                    return Ast.equalTerms(closedTerm, cell.contents);
+                }
+            } else {
+                // Closed and open are the same bound variable
+                return closedTerm.type === openTerm.type && closedTerm.index === openTerm.index;
+            }
+        case 'TermConst':
+            return (
+                // Closed term and open term are both constants,
+                closedTerm.type === openTerm.type &&
+                closedTerm.head === openTerm.head && // With the same head,
+                closedTerm.spine.length === openTerm.spine.length && // And the same arguments
+                closedTerm.spine.every((tm, i) => matchTerm(tm, openTerm.spine[i], cell, index))
+            );
+        default:
+            throw impossible(openTerm);
+    }
+}
+
+export function matchProp(
+    closed: Ast.Proposition,
+    open: Ast.Proposition,
+    cell: Cell,
+    index: number
+): boolean {
+    switch (open.type) {
+        case 'Atom':
+            if (closed.type !== open.type) return false;
+            if (closed.predicate !== open.predicate) return false;
+            if (closed.spine.length !== open.spine.length) return false;
+            return closed.spine.every((tm, i) => matchTerm(tm, open.spine[i], cell, index));
+        case 'PropAll':
+        case 'PropExists':
+            if (closed.type !== open.type) return false;
+            return matchProp(closed.argument, open.argument, cell, index + 1);
+        case 'PropAnd':
+        case 'PropOr':
+        case 'PropImplies':
+            if (closed.type !== open.type) return false;
+            return (
+                matchProp(closed.left, open.left, cell, index) &&
+                matchProp(closed.right, open.right, cell, index)
+            );
+        case 'PropTrue':
+        case 'PropFalse':
+            return closed.type === open.type;
+        default:
+            throw impossible(open);
     }
 }

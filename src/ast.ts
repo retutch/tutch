@@ -20,7 +20,7 @@ export interface SourceLocation {
 export type Term = TermVar | TermConst;
 
 export interface TermVar extends Syn {
-    readonly type: 'TermVar',
+    readonly type: 'TermVar';
     readonly index: number;
 }
 
@@ -207,14 +207,15 @@ export interface Proof extends Syn {
 export function equalTerms(a: Term, b: Term): boolean {
     switch (a.type) {
         case 'TermVar': {
-            return a.type === b.type &&
-                a.index === b.index;
+            return a.type === b.type && a.index === b.index;
         }
         case 'TermConst': {
-            return a.type === b.type &&
+            return (
+                a.type === b.type &&
                 a.head === b.head &&
-                a.spine.length === b.spine.length && 
-                a.spine.every((tm, i) => equalTerms(tm, b.spine[i]));
+                a.spine.length === b.spine.length &&
+                a.spine.every((tm, i) => equalTerms(tm, b.spine[i]))
+            );
         }
     }
 }
