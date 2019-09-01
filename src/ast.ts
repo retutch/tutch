@@ -17,9 +17,16 @@ export interface SourceLocation {
     readonly source: string | null;
 }
 
-export interface Term extends Syn {
-    readonly type: 'Term';
-    readonly head: string | number;
+export type Term = TermVar | TermConst;
+
+export interface TermVar extends Syn {
+    readonly type: 'TermVar',
+    readonly index: number;
+}
+
+export interface TermConst extends Syn {
+    readonly type: 'TermConst';
+    readonly head: string;
     readonly spine: Term[];
 }
 
@@ -83,17 +90,20 @@ function freshenRelativeTo(sigma: string[], x: string): string {
 }
 
 export function termToString(sigma: string[], term: Term): string {
-    let head: string;
-    if (typeof term.head === 'string') {
-        head = term.head;
-    } else {
-        head = sigma[term.head];
-    }
-
-    if (term.spine.length === 0) {
-        return head;
-    } else {
-        return `(${term.head}${term.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')})`;
+    switch (term.type) {
+        case 'TermConst': {
+            if (term.spine.length === 0) {
+                return term.head;
+            } else {
+                return `(${term.head}${term.spine.map(tm => ` ${termToString(sigma, tm)}`)})`;
+            }
+        }
+        case 'TermVar': {
+            return sigma[term.index];
+        }
+        default: {
+            throw impossible(term);
+        }
     }
 }
 
@@ -121,22 +131,25 @@ export function propToString(sigma: string[], prop: Proposition): string {
             return `${prop.predicate}${prop.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')}`;
         /* istanbul ignore next */
         default:
-            return impossible(prop);
+            throw impossible(prop);
     }
 }
 
 export function termToStringDebug(term: Term): string {
-    let head: string;
-    if (typeof term.head === 'string') {
-        head = term.head;
-    } else {
-        head = `#${term.head}`;
-    }
-
-    if (term.spine.length === 0) {
-        return head;
-    } else {
-        return `(${term.head}${term.spine.map(tm => ` ${termToStringDebug(tm)}`).join('')})`;
+    switch (term.type) {
+        case 'TermVar': {
+            return `#${term.index}`;
+        }
+        case 'TermConst': {
+            if (term.spine.length === 0) {
+                return term.head;
+            } else {
+                return `(${term.head}${term.spine.map(tm => ` ${termToStringDebug(tm)}`).join('')})`;
+            }
+        }
+        default: {
+            throw impossible(term);
+        }
     }
 }
 
@@ -162,7 +175,7 @@ export function propToStringDebug(prop: Proposition): string {
             return `${prop.predicate}${prop.spine.map(tm => ` ${termToStringDebug(tm)}`).join('')}`;
         /* istanbul ignore next */
         default:
-            return impossible(prop);
+            throw impossible(prop);
     }
 }
 
@@ -192,12 +205,18 @@ export interface Proof extends Syn {
 }
 
 export function equalTerms(a: Term, b: Term): boolean {
-    return (
-        a.type === b.type &&
-        a.head === b.head &&
-        a.spine.length === b.spine.length &&
-        a.spine.every((tm, i) => equalTerms(tm, b.spine[i]))
-    );
+    switch (a.type) {
+        case 'TermVar': {
+            return a.type === b.type &&
+                a.index === b.index;
+        }
+        case 'TermConst': {
+            return a.type === b.type &&
+                a.head === b.head &&
+                a.spine.length === b.spine.length && 
+                a.spine.every((tm, i) => equalTerms(tm, b.spine[i]));
+        }
+    }
 }
 
 export function equalProps(a: Proposition, b: Proposition): boolean {

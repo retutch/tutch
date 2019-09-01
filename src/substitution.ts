@@ -1,19 +1,31 @@
 import * as Ast from './ast';
 import { impossible } from '@calculemus/impossible';
+import { ParsingError } from './error';
 
-export function openTerm(term: Ast.Term, i: number, x: string): Ast.Term {
-    let head: number | string;
-    if (term.head === i) {
-        head = x;
-    } else {
-        head = term.head;
+export function openTerm(term: Ast.Term, index: number, x: string): Ast.Term {
+    switch (term.type) {
+        case 'TermVar': {
+            if (term.index === index) {
+                return {
+                    type: 'TermConst',
+                    head: x,
+                    spine: [],
+                }
+            } else {
+                return term;
+            }
+        }
+        case 'TermConst': {
+            return {
+                type: 'TermConst',
+                head: term.head,
+                spine: term.spine.map(term => openTerm(term, index, x)),
+            };            
+        }
+        default: {
+            throw impossible(term);
+        }
     }
-
-    return {
-        type: 'Term',
-        head,
-        spine: term.spine.map(tm => openTerm(tm, i, x)),
-    };
 }
 
 export function openProp(prop: Ast.Proposition, i: number, x: string): Ast.Proposition {
@@ -80,19 +92,33 @@ export function openProofStep(step: Ast.ProofStep, i: number, x: string): Ast.Pr
     }
 }
 
-export function closeTerm(term: Ast.Term, i: number, x: string): Ast.Term {
-    let head: number | string;
-    if (term.head === x) {
-        head = i;
-    } else {
-        head = term.head;
+export function closeTerm(term: Ast.Term, index: number, x: string): Ast.Term {
+    switch (term.type) {
+        case 'TermVar': {
+            return term;
+        }
+        case 'TermConst': {
+            if (term.head === x) {
+                if (term.spine.length > 0) {
+                    throw new ParsingError(term, `Bound variable '${term.head}' cannot have arguments applied to it.`);
+                } else {
+                    return {
+                        type: 'TermVar',
+                        index,
+                    };
+                }
+            } else {
+                return {
+                    type: 'TermConst',
+                    head: term.head,
+                    spine: term.spine.map(term => closeTerm(term, index, x)),
+                }
+            }
+        }
+        default: {
+            throw impossible(term);
+        }
     }
-
-    return {
-        type: 'Term',
-        head,
-        spine: term.spine.map(tm => closeTerm(tm, i, x)),
-    };
 }
 
 export function closeProp(prop: Ast.Proposition, i: number, x: string): Ast.Proposition {

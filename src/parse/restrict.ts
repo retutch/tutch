@@ -12,7 +12,7 @@ export function TermAtom(syn: parse.TermAtom): ast.Term {
         throw new ParsingError(syn, 'Term variables and constants must start with a lower case letter');
 
     return {
-        type: 'Term',
+        type: 'TermConst',
         head: syn.head,
         spine: syn.spine.map(Term),
         range: range ? syn.range : undefined,
