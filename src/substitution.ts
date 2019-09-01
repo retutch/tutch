@@ -115,6 +115,7 @@ export function closeTerm(term: Ast.Term, index: number, x: string): Ast.Term {
                 }
             }
         }
+        /* istanbul ignore next */
         default: {
             throw impossible(term);
         }
