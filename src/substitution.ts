@@ -193,12 +193,25 @@ export interface Cell {
     contents: null | Ast.Term;
 }
 
+function isClosed(term: Ast.Term) {
+    switch (term.type) {
+        case 'TermVar':
+            return false;
+        case 'TermConst':
+            return term.spine.every(isClosed);
+        default:
+            throw impossible(term);
+    }
+}
+
 export function matchTerm(closedTerm: Ast.Term, openTerm: Ast.Term, cell: Cell, index: number): boolean {
     switch (openTerm.type) {
         case 'TermVar':
             if (openTerm.index === index) {
                 if (cell.contents === null) {
-                    // XXX - occurs check - need to check closedTerm is closed
+                    // Occurs check
+                    if (!isClosed(closedTerm)) return false;
+
                     cell.contents = closedTerm;
                     return true;
                 } else {

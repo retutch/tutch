@@ -225,9 +225,9 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                                 rule: 'existential quantification introduction',
                                 loc: step.loc!,
                                 by: [instantiation.loc!],
-                            }
-                        ]
-                    }
+                            },
+                        ],
+                    };
                 }
             }
         }
@@ -260,7 +260,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                                     justs: [
                                         {
                                             type: 'Justified',
-                                            rule: 'existential quantifier elimination',                                            
+                                            rule: 'existential quantifier elimination',
                                             loc: step.loc!,
                                             by: [existential.loc!, hyp.loc],
                                         },
@@ -355,7 +355,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                     }
                 } else if (hyp.type === 'PropAll') {
                     const openTerm = hyp.argument;
-                    if (matchProp(step, openTerm, {contents:null}, 0)) {
+                    if (matchProp(step, openTerm, { contents: null }, 0)) {
                         return {
                             hyp: step,
                             justs: [
@@ -363,10 +363,10 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                                     type: 'Justified',
                                     rule: 'universial quantification elimination',
                                     loc: step.loc!,
-                                    by: [hyp.loc!]
-                                }
-                            ]
-                        }
+                                    by: [hyp.loc!],
+                                },
+                            ],
+                        };
                     }
                 } // forall
             }
