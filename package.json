@@ -1,6 +1,6 @@
 {
     "name": "tutch",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Typescript implementation of Tutch, a TUTorial proof CHecker.",
     "main": "dist/index.js",
     "types": "dist/index.d.js",
@@ -31,11 +31,10 @@
     "homepage": "https://github.com/chrisamaphone/tutch#readme",
     "devDependencies": {
         "@calculemus/impossible": "0.0.4",
-        "@types/chai": "^4.1.7",
+        "@types/chai": "^4.2.1",
         "@types/mocha": "^5.2.6",
         "@types/moo": "^0.5.0",
-        "@types/nearley": "^2.11.0",
-        "@types/node": "^12.7.3",
+        "@types/node": "^12.7.4",
         "chai": "^4.2.0",
         "coveralls": "^3.0.3",
         "mkdirp": "^0.5.1",
@@ -50,6 +49,7 @@
         "webpack": "^4.39.3"
     },
     "dependencies": {
+        "@types/nearley": "^2.11.0",
         "moo": "^0.5.0",
         "nearley": "^2.19.0"
     },
