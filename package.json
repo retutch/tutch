@@ -1,12 +1,9 @@
 {
     "name": "tutch",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "Typescript implementation of Tutch, a TUTorial proof CHecker.",
     "main": "dist/index.js",
     "types": "dist/index.d.js",
-    "files": [
-        "/dist/**/*"
-    ],
     "scripts": {
         "coveralls": "nyc report --reporter=text-lcov | coveralls",
         "test": "nyc mocha -r ts-node/register src/**/*_test.ts",
@@ -19,16 +16,15 @@
         "tsc": "tsc",
         "watch": "tsc -w"
     },
+    "files": [
+        "/dist/**/*"
+    ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/chrisamaphone/tutch.git"
+        "url": "git+https://github.com/retutch/tutch.git"
     },
     "author": "Chris Martens and Rob Simmons",
     "license": "GPL-3.0",
-    "bugs": {
-        "url": "https://github.com/chrisamaphone/tutch/issues"
-    },
-    "homepage": "https://github.com/chrisamaphone/tutch#readme",
     "devDependencies": {
         "@types/chai": "^4.2.1",
         "@types/mocha": "^5.2.6",
