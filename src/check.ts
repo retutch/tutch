@@ -376,7 +376,7 @@ function checkProofStep(lemmas: Lemmas, gamma: Gamma, step: ProofStep): { hyp: H
                             justs: [
                                 {
                                     type: 'Justified',
-                                    rule: 'universial quantification elimination',
+                                    rule: 'universal quantification elimination',
                                     loc: step.loc!,
                                     by: [hyp.loc!],
                                 },
