@@ -55,7 +55,13 @@ export function parse(str: string): Ast.Proof[] {
 }
 
 export function evaluate(proofs: Ast.Proof[]): Justification[] {
-    return proofs.reduce((justs: Justification[], proof) => justs.concat(checkProof(proof)), []);
+    const lemmas = new Map<string, Ast.Proposition>();
+    const justs = proofs.reduce((justs: Justification[], proof) => {
+        const newJusts = checkProof(proof, lemmas)
+        lemmas.set(proof.name, proof.goal);
+        return justs.concat(newJusts);
+    }, []);
+    return justs;
 }
 
 export function evaluateAssert(proofs: Ast.Proof[]) {

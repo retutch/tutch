@@ -24,6 +24,7 @@ interface Inference extends Syn {
     loc: SourceLocation;
 }
 
+type Lemmas = Map<string, Proposition>;
 type Hyp = Hypothesis | Inference;
 type Gamma = Hyp[];
 
@@ -75,9 +76,9 @@ function generalizationInHyps(prop: Proposition, gamma: Gamma): Inference | null
     return null;
 }
 
-function checkProofSteps(gamma: Gamma, steps: ProofStep[]): { justs: Justification[] } {
+function checkProofSteps(lemmas: Lemmas, gamma: Gamma, steps: ProofStep[]): { justs: Justification[] } {
     const justs = steps.reduce((oldJusts: Justification[], step) => {
-        const { hyp, justs: newJusts } = checkProofStep(gamma, step);
+        const { hyp, justs: newJusts } = checkProofStep(lemmas, gamma, step);
         gamma.push(hyp);
         return oldJusts.concat(newJusts);
     }, []);
@@ -94,7 +95,7 @@ function freshRelativeTo(gamma: Gamma, x: string) {
     return `${x}${i}`;
 }
 
-function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justification[] } {
+function checkProofStep(lemmas: Lemmas, gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justification[] } {
     if (step.type === 'HypotheticalProof') {
         // Check a hypothetical proof (multiple steps)
         if (step.hypotheses.length === 0) throw new ImpossibleError('No hypotheses');
@@ -122,7 +123,7 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
         }
 
         const gamma2 = gamma.slice().concat(closedHyps);
-        const { justs } = checkProofSteps(gamma2, steps.concat([consequent]));
+        const { justs } = checkProofSteps(lemmas, gamma2, steps.concat([consequent]));
         const hyp: Hyp = {
             type: 'Inference',
             premises: step.hypotheses,
@@ -228,6 +229,20 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
                             },
                         ],
                     };
+                }
+            }
+        }
+
+        for (let [name, prop] of lemmas) {
+            if (equalProps(step, prop)) {
+                return {
+                    hyp: step,
+                    justs: [{
+                        type: 'Justified',
+                        rule: `lemma ${name}`,
+                        loc: step.loc!,
+                        by: [prop.loc!],
+                    }]
                 }
             }
         }
@@ -384,9 +399,9 @@ function checkProofStep(gamma: Gamma, step: ProofStep): { hyp: Hyp; justs: Justi
     }
 }
 
-export function checkProof(proof: Proof): Justification[] {
+export function checkProof(proof: Proof, lemmas?: Lemmas): Justification[] {
     const hyps: Hyp[] = [];
-    const { justs } = checkProofSteps(hyps, proof.proof.concat([proof.consequent]));
+    const { justs } = checkProofSteps(lemmas || new Map(), hyps, proof.proof.concat([proof.consequent]));
     const unjustified = justs.filter(({ type }) => type === 'NotJustified');
 
     let goalJust: Justification;
