@@ -275,7 +275,7 @@ function checkProofStep(lemmas: Lemmas, gamma: Gamma, step: ProofStep): { hyp: H
                                     justs: [
                                         {
                                             type: 'Justified',
-                                            rule: 'existential quantifier elimination',
+                                            rule: 'existential quantification elimination',
                                             loc: step.loc!,
                                             by: [existential.loc!, hyp.loc],
                                         },
