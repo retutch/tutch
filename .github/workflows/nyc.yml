@@ -1,0 +1,21 @@
+name: Test with istanbul
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: npm ci
+      - name: Run nearley
+        run: npm run nearley
+      - name: Compile with typescript
+        run: npm run tsc
+      - name: Run tests
+        run: npm run test
