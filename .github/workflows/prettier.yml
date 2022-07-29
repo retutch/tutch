@@ -1,0 +1,16 @@
+name: Check formatting
+
+on:
+  push:
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: actionsx/prettier
+        uses: actionsx/prettier@v2
+        with:
+          args: --check .
