@@ -17,7 +17,7 @@ function testfile(filepath: string) {
     let specs: Spec[];
     try {
         specs = parseSpec(spectxt[0], filepath);
-    } catch (err) {
+    } catch (err: any) {
         console.log(err.message);
         specs = [];
     }
@@ -47,10 +47,10 @@ function testfile(filepath: string) {
 }
 
 const dir = './tests';
-readdirSync(dir).forEach(subdir => {
+readdirSync(dir).forEach((subdir) => {
     if (lstatSync(join(dir, subdir)).isDirectory()) {
         describe(`Tests in suite ${subdir}`, () => {
-            readdirSync(join(dir, subdir)).forEach(file => {
+            readdirSync(join(dir, subdir)).forEach((file) => {
                 const ext = extname(file);
                 if (ext === '.tut') {
                     testfile(join(dir, subdir, file));

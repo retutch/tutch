@@ -127,8 +127,8 @@ export function PropAtom([head, args]: [Token, [WS, Term][]]): PropAtom & Syn {
 }
 
 export type Proposition =
-    | ast.PropTrue & Syn
-    | ast.PropFalse & Syn
+    | (ast.PropTrue & Syn)
+    | (ast.PropFalse & Syn)
     | PropParens
     | PropAtom
     | UnaryProposition
@@ -284,7 +284,7 @@ export function HypotheticalProof([l, , hypotheses, , steps, r]: HypotheticalPro
     return {
         type: 'HypotheticalProof',
         hypotheses,
-        steps: steps.map(x => x[2]),
+        steps: steps.map((x) => x[2]),
         range: [l.offset, r.offset + r.text.length],
         loc: locloc(tokloc(l), tokloc(r)),
     };
@@ -292,12 +292,12 @@ export function HypotheticalProof([l, , hypotheses, , steps, r]: HypotheticalPro
 
 type HypothesesArg = [[Proposition, WS, Token, WS][], Proposition];
 export function Hypotheses([steps, last]: HypothesesArg): Proposition[] {
-    return steps.map(x => x[0]).concat([last]);
+    return steps.map((x) => x[0]).concat([last]);
 }
 
 type ProofSequenceArg = [[ProofStep, WS, Token, WS][], ProofStep];
 export function ProofSequence([steps, last]: ProofSequenceArg): ProofStep[] {
-    return steps.map(x => x[0]).concat([last]);
+    return steps.map((x) => x[0]).concat([last]);
 }
 
 export interface ProofDeclaration extends Syn {

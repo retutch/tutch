@@ -81,7 +81,7 @@ export interface PropExists extends Syn {
 function freshenRelativeTo(sigma: string[], x: string): string {
     let i = 0;
     let z = x;
-    while (sigma.some(y => x === y)) {
+    while (sigma.some((y) => x === y)) {
         i += 1;
         z = `${x}${i}`;
     }
@@ -95,7 +95,7 @@ export function termToString(sigma: string[], term: Term): string {
             if (term.spine.length === 0) {
                 return term.head;
             } else {
-                return `(${term.head}${term.spine.map(tm => ` ${termToString(sigma, tm)}`)})`;
+                return `(${term.head}${term.spine.map((tm) => ` ${termToString(sigma, tm)}`)})`;
             }
         }
         case 'TermVar': {
@@ -128,7 +128,7 @@ export function propToString(sigma: string[], prop: Proposition): string {
             return `(?${x}:${prop.sort}.${propToString([x].concat(sigma), prop.argument)})`;
         }
         case 'Atom':
-            return `${prop.predicate}${prop.spine.map(tm => ` ${termToString(sigma, tm)}`).join('')}`;
+            return `${prop.predicate}${prop.spine.map((tm) => ` ${termToString(sigma, tm)}`).join('')}`;
         /* istanbul ignore next */
         default:
             throw impossible(prop);
@@ -144,7 +144,7 @@ export function termToStringDebug(term: Term): string {
             if (term.spine.length === 0) {
                 return term.head;
             } else {
-                return `(${term.head}${term.spine.map(tm => ` ${termToStringDebug(tm)}`).join('')})`;
+                return `(${term.head}${term.spine.map((tm) => ` ${termToStringDebug(tm)}`).join('')})`;
             }
         }
         default: {
@@ -172,7 +172,7 @@ export function propToStringDebug(prop: Proposition): string {
             return `(?${prop.variable}:${prop.sort}.${propToStringDebug(prop.argument)})`;
         }
         case 'Atom':
-            return `${prop.predicate}${prop.spine.map(tm => ` ${termToStringDebug(tm)}`).join('')}`;
+            return `${prop.predicate}${prop.spine.map((tm) => ` ${termToStringDebug(tm)}`).join('')}`;
         /* istanbul ignore next */
         default:
             throw impossible(prop);

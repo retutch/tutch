@@ -19,7 +19,7 @@ export function openTerm(term: Ast.Term, index: number, x: string): Ast.Term {
             return {
                 type: 'TermConst',
                 head: term.head,
-                spine: term.spine.map(term => openTerm(term, index, x)),
+                spine: term.spine.map((term) => openTerm(term, index, x)),
             };
         }
         default: {
@@ -34,7 +34,7 @@ export function openProp(prop: Ast.Proposition, i: number, x: string): Ast.Propo
             return {
                 type: 'Atom',
                 predicate: prop.predicate,
-                spine: prop.spine.map(tm => openTerm(tm, i, x)),
+                spine: prop.spine.map((tm) => openTerm(tm, i, x)),
                 loc: prop.loc,
                 range: prop.range,
             };
@@ -70,7 +70,7 @@ export function openProp(prop: Ast.Proposition, i: number, x: string): Ast.Propo
 
 export function openProofStep(step: Ast.ProofStep, i: number, x: string): Ast.ProofStep {
     if (step.type === 'HypotheticalProof') {
-        const hypotheses = step.hypotheses.map(hypothesis => {
+        const hypotheses = step.hypotheses.map((hypothesis) => {
             if (hypothesis.type === 'VariableDeclaration') {
                 i++;
                 return hypothesis;
@@ -82,7 +82,7 @@ export function openProofStep(step: Ast.ProofStep, i: number, x: string): Ast.Pr
         return {
             type: 'HypotheticalProof',
             hypotheses,
-            steps: step.steps.map(step => openProofStep(step, i, x)),
+            steps: step.steps.map((step) => openProofStep(step, i, x)),
             consequent: openProp(step.consequent, i, x),
             loc: step.loc,
             range: step.range,
@@ -114,7 +114,7 @@ export function closeTerm(term: Ast.Term, index: number, x: string): Ast.Term {
                 return {
                     type: 'TermConst',
                     head: term.head,
-                    spine: term.spine.map(term => closeTerm(term, index, x)),
+                    spine: term.spine.map((term) => closeTerm(term, index, x)),
                 };
             }
         }
@@ -131,7 +131,7 @@ export function closeProp(prop: Ast.Proposition, i: number, x: string): Ast.Prop
             return {
                 type: 'Atom',
                 predicate: prop.predicate,
-                spine: prop.spine.map(tm => closeTerm(tm, i, x)),
+                spine: prop.spine.map((tm) => closeTerm(tm, i, x)),
                 loc: prop.loc,
                 range: prop.range,
             };
@@ -167,7 +167,7 @@ export function closeProp(prop: Ast.Proposition, i: number, x: string): Ast.Prop
 
 export function closeProofStep(step: Ast.ProofStep, i: number, x: string): Ast.ProofStep {
     if (step.type === 'HypotheticalProof') {
-        const hypotheses = step.hypotheses.map(hypothesis => {
+        const hypotheses = step.hypotheses.map((hypothesis) => {
             if (hypothesis.type === 'VariableDeclaration') {
                 i++;
                 return hypothesis;
@@ -179,7 +179,7 @@ export function closeProofStep(step: Ast.ProofStep, i: number, x: string): Ast.P
         return {
             type: 'HypotheticalProof',
             hypotheses,
-            steps: step.steps.map(step => closeProofStep(step, i, x)),
+            steps: step.steps.map((step) => closeProofStep(step, i, x)),
             consequent: closeProp(step.consequent, i, x),
             loc: step.loc,
             range: step.range,
@@ -193,7 +193,7 @@ export interface Cell {
     contents: null | Ast.Term;
 }
 
-function isClosed(term: Ast.Term) {
+function isClosed(term: Ast.Term): boolean {
     switch (term.type) {
         case 'TermVar':
             return false;

@@ -87,7 +87,7 @@ function checkProofSteps(lemmas: Lemmas, gamma: Gamma, steps: ProofStep[]): { ju
 
 function freshRelativeTo(gamma: Gamma, x: string) {
     function inGamma(y: string) {
-        return gamma.some(hyp => hyp.type === 'VariableDeclaration' && hyp.variable == y);
+        return gamma.some((hyp) => hyp.type === 'VariableDeclaration' && hyp.variable == y);
     }
     if (!inGamma(x)) return x;
     let i = 0;
@@ -117,7 +117,7 @@ function checkProofStep(lemmas: Lemmas, gamma: Gamma, step: ProofStep): { hyp: H
                         closedHyps[j] = openProp(closedHyps[j] as Proposition, k, x);
                     }
                 }
-                steps = steps.map(step => openProofStep(step, k, x));
+                steps = steps.map((step) => openProofStep(step, k, x));
                 consequent = openProp(consequent, k, x);
             }
         }
@@ -237,13 +237,15 @@ function checkProofStep(lemmas: Lemmas, gamma: Gamma, step: ProofStep): { hyp: H
             if (equalProps(step, prop)) {
                 return {
                     hyp: step,
-                    justs: [{
-                        type: 'Justified',
-                        rule: `lemma ${name}`,
-                        loc: step.loc!,
-                        by: [prop.loc!],
-                    }]
-                }
+                    justs: [
+                        {
+                            type: 'Justified',
+                            rule: `lemma ${name}`,
+                            loc: step.loc!,
+                            by: [prop.loc!],
+                        },
+                    ],
+                };
             }
         }
 
@@ -426,7 +428,7 @@ export function checkProof(proof: Proof, lemmas?: Lemmas): Justification[] {
 
 export function assertProof(proof: Proof) {
     const justs = checkProof(proof);
-    justs.forEach(just => {
+    justs.forEach((just) => {
         if (just.type === 'NotJustified') throw new NoJustificationError('', just.loc);
     });
 }

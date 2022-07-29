@@ -15,7 +15,7 @@ export function parseGrammar(grammar: Grammar, str: string) {
     try {
         parser.feed(str);
         syn = parser.finish();
-    } catch (err) {
+    } catch (err: any) {
         /* istanbul ignore else  */
         if (err.token) {
             throw new ParsingError(
@@ -57,7 +57,7 @@ export function parse(str: string): Ast.Proof[] {
 export function evaluate(proofs: Ast.Proof[]): Justification[] {
     const lemmas = new Map<string, Ast.Proposition>();
     const justs = proofs.reduce((justs: Justification[], proof) => {
-        const newJusts = checkProof(proof, lemmas)
+        const newJusts = checkProof(proof, lemmas);
         lemmas.set(proof.name, proof.goal);
         return justs.concat(newJusts);
     }, []);
@@ -65,7 +65,7 @@ export function evaluate(proofs: Ast.Proof[]): Justification[] {
 }
 
 export function evaluateAssert(proofs: Ast.Proof[]) {
-    evaluate(proofs).forEach(just => {
+    evaluate(proofs).forEach((just) => {
         if (just.type === 'NotJustified') throw new NoJustificationError('', just);
     });
 }

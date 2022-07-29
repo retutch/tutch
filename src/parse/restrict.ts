@@ -167,9 +167,6 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
                     return PropEquiv(syn);
                 case '|':
                     return PropOr(syn);
-                /* istanbul ignore next */
-                default:
-                    return impossible(syn.oper);
             }
         }
         case 'UnaryProposition': {
@@ -181,9 +178,6 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
                     return PropAll(syn);
                 case '?':
                     return PropExists(syn);
-                /* istanbul ignore next */
-                default:
-                    return impossible(syn.oper);
             }
         }
         /* istanbul ignore next */
@@ -246,7 +240,7 @@ export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
                             );
                         }
                     }
-                    steps = steps.map(step => closeProofStep(step, k, hypothesis.variable));
+                    steps = steps.map((step) => closeProofStep(step, k, hypothesis.variable));
                     consequent = closeProp(consequent, k, hypothesis.variable);
                     k++;
                 }
@@ -267,7 +261,7 @@ export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
 
 export function Proof(syn: parse.ProofDeclaration): ast.Proof {
     const goal = Proposition(syn.goal);
-    const proof = syn.steps.map(x => ProofStep(x));
+    const proof = syn.steps.map((x) => ProofStep(x));
     const consequent = proof.pop()!;
     if (consequent.type === 'HypotheticalProof' || !ast.equalProps(goal, consequent)) {
         throw new ParsingError(consequent, "The last line in a proof must be the proof's goal proposition.");
