@@ -3,18 +3,17 @@ language: node_js
 node_js: node
 
 script:
-- npm run nearley
-- npm run tsc
-- npm test
-- npm run coveralls
+    - npm run nearley
+    - npm run tsc
+    - npm test
+    - npm run coveralls
 
 deploy:
-  provider: npm
-  email: rob@calculem.us
-  skip-cleanup: true
-  api_key:
-    secure: VXAQ/0cMpqNlBpVSAJFZOtsqWDnNWIm3TWZBu1mXgxiLvjBE05KG7XDVQKVYv1iho36BeaIhQcuSra/NSmIx7nqtyXISVig3lXAC+6V2nrmtxr4DsuogXFT+3p9AcAVt/m4+vS98nTuXjcncKBiMQpUbXaws5uUsiJS+Q+DN6/Rya6xbIUEDpXbQisF3HaQ+JRm4+/W0+fYdmO2enLyj4qAzHsFz8tjHpt8O6DoKzNKqDRLzEVnwn4V2b5t9cO+MavagsEITaXOc6WCgepZ+cpFhnT4kQuiiU1kIeo3Q959eZW+qONRe4DWYYFYW1u40QFIJScQbLkIQJkozAjk5ZEEgIqCopsSAxMU50mkMY5SOVq44AXrzYpBWaAX80J7VxhKZtbdFR2duJ7tZti8klA5dC329QICN0+iA9GbRh+KhmDoqR7gmwTbYKesPriBpwxEvBPSKw7/a3jeWbvuAFzy3wM1CVEaBv4kOdJveMxN2hWi2lkQtCMxFSt49dRJV++d5hZtJ3eGNlfJQ4kuDLJ2L/dFKIL8fS8mlF0VtE0Q5db2AVUbDHDczpp8Wyyksbr7EJfI5YkfndxRaQe8+CaQmTMb2Xp57LnBQpWrLx0By9sGZILS1KTAWKW9Q1FcYqJtiObQwBr/i7Y6gEdXKo2NFUQXnFI6GFpfhoRu/GCw=
-  on:
-    repo: retutch/tutch
-    branch: master
-
+    provider: npm
+    email: rob@calculem.us
+    skip-cleanup: true
+    api_key:
+        secure: VXAQ/0cMpqNlBpVSAJFZOtsqWDnNWIm3TWZBu1mXgxiLvjBE05KG7XDVQKVYv1iho36BeaIhQcuSra/NSmIx7nqtyXISVig3lXAC+6V2nrmtxr4DsuogXFT+3p9AcAVt/m4+vS98nTuXjcncKBiMQpUbXaws5uUsiJS+Q+DN6/Rya6xbIUEDpXbQisF3HaQ+JRm4+/W0+fYdmO2enLyj4qAzHsFz8tjHpt8O6DoKzNKqDRLzEVnwn4V2b5t9cO+MavagsEITaXOc6WCgepZ+cpFhnT4kQuiiU1kIeo3Q959eZW+qONRe4DWYYFYW1u40QFIJScQbLkIQJkozAjk5ZEEgIqCopsSAxMU50mkMY5SOVq44AXrzYpBWaAX80J7VxhKZtbdFR2duJ7tZti8klA5dC329QICN0+iA9GbRh+KhmDoqR7gmwTbYKesPriBpwxEvBPSKw7/a3jeWbvuAFzy3wM1CVEaBv4kOdJveMxN2hWi2lkQtCMxFSt49dRJV++d5hZtJ3eGNlfJQ4kuDLJ2L/dFKIL8fS8mlF0VtE0Q5db2AVUbDHDczpp8Wyyksbr7EJfI5YkfndxRaQe8+CaQmTMb2Xp57LnBQpWrLx0By9sGZILS1KTAWKW9Q1FcYqJtiObQwBr/i7Y6gEdXKo2NFUQXnFI6GFpfhoRu/GCw=
+    on:
+        repo: retutch/tutch
+        branch: master
