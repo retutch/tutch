@@ -120,7 +120,6 @@ function testfile(filepath: string) {
 
   specs.forEach((spec, i) => {
     test(`${filepath}${i ? `.${i}` : ''} should ${spec.description}`, async () => {
-      console.log(spec.outcome);
       switch (spec.outcome) {
         case 'error':
           expect(() => parse(contents)).toThrowErrorMatchingSnapshot();
