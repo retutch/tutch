@@ -7,7 +7,7 @@ A TypeScript implementation of the TUTorial proof CHecker (Tutch), a language th
 
 This package just consists of the parser and proof checking logic for Tutch, which can be run like this in Node or in a tool like [RunKit](https://npm.runkit.com/tutch).
 
-``` javascript
+```javascript
 const tutch = require("tutch");
 
 const proofOfK = tutch.parse(`
