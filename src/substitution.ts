@@ -1,5 +1,4 @@
 import * as Ast from './ast';
-import { impossible } from '@calculemus/impossible';
 import { ParsingError } from './error';
 
 export function openTerm(term: Ast.Term, index: number, x: string): Ast.Term {
@@ -16,16 +15,13 @@ export function openTerm(term: Ast.Term, index: number, x: string): Ast.Term {
       }
     }
     case 'TermConst': {
-      return {
-        type: 'TermConst',
-        head: term.head,
-        spine: term.spine.map((term) => openTerm(term, index, x)),
-      };
+        return {
+          type: 'TermConst',
+          head: term.head,
+          spine: term.spine.map((term) => openTerm(term, index, x)),
+        };
+      }
     }
-    default: {
-      throw impossible(term);
-    }
-  }
 }
 
 export function openProp(prop: Ast.Proposition, i: number, x: string): Ast.Proposition {
@@ -62,9 +58,6 @@ export function openProp(prop: Ast.Proposition, i: number, x: string): Ast.Propo
     case 'PropFalse':
     case 'PropTrue':
       return prop;
-    /* istanbul ignore next */
-    default:
-      return impossible(prop);
   }
 }
 
@@ -118,10 +111,6 @@ export function closeTerm(term: Ast.Term, index: number, x: string): Ast.Term {
         };
       }
     }
-    /* istanbul ignore next */
-    default: {
-      throw impossible(term);
-    }
   }
 }
 
@@ -159,9 +148,6 @@ export function closeProp(prop: Ast.Proposition, i: number, x: string): Ast.Prop
     case 'PropFalse':
     case 'PropTrue':
       return prop;
-    /* istanbul ignore next */
-    default:
-      return impossible(prop);
   }
 }
 
@@ -199,8 +185,6 @@ function isClosed(term: Ast.Term): boolean {
       return false;
     case 'TermConst':
       return term.spine.every(isClosed);
-    default:
-      throw impossible(term);
   }
 }
 
@@ -234,9 +218,6 @@ export function matchTerm(
         closedTerm.spine.length === openTerm.spine.length && // And the same arguments
         closedTerm.spine.every((tm, i) => matchTerm(tm, openTerm.spine[i], cell, index))
       );
-    /* istanbul ignore next */
-    default:
-      throw impossible(openTerm);
   }
 }
 
@@ -267,8 +248,5 @@ export function matchProp(
     case 'PropTrue':
     case 'PropFalse':
       return closed.type === open.type;
-    /* istanbul ignore next */
-    default:
-      throw impossible(open);
   }
 }

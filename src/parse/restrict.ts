@@ -1,6 +1,5 @@
 import * as ast from '../ast';
 import * as parse from './parse';
-import { impossible } from '@calculemus/impossible';
 import { ParsingError } from '../error';
 import { closeProp, closeProofStep } from '../substitution';
 
@@ -180,9 +179,6 @@ export function Proposition(syn: parse.Proposition): ast.Proposition {
           return PropExists(syn);
       }
     }
-    /* istanbul ignore next */
-    default:
-      return impossible(syn);
   }
 }
 
