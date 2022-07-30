@@ -10,7 +10,7 @@ This package just consists of the parser and proof checking logic for Tutch, whi
     const tutch = require("tutch");
 
     const proofOfK = tutch.parse(`
-    
+
     proof k : A => B => A =
     begin
     [ A;
@@ -19,7 +19,7 @@ This package just consists of the parser and proof checking logic for Tutch, whi
       B => A ];
     A => B => A
     end;
-    
+
     `);
 
     tutch.isJustified(proofOfK);
