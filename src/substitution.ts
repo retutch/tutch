@@ -15,13 +15,13 @@ export function openTerm(term: Ast.Term, index: number, x: string): Ast.Term {
       }
     }
     case 'TermConst': {
-        return {
-          type: 'TermConst',
-          head: term.head,
-          spine: term.spine.map((term) => openTerm(term, index, x)),
-        };
-      }
+      return {
+        type: 'TermConst',
+        head: term.head,
+        spine: term.spine.map((term) => openTerm(term, index, x)),
+      };
     }
+  }
 }
 
 export function openProp(prop: Ast.Proposition, i: number, x: string): Ast.Proposition {
