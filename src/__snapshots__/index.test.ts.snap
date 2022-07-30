@@ -1,5 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Tests in suite firstorder tests/firstorder/non-t-sort.tut should be flagged as an ill-formed file 1`] = `"Only \`t\` is allowed as a first-order type, not custom"`;
+
+exports[`Tests in suite prop tests/prop/hyphyp.tut should be flagged as an ill-formed file 1`] = `"Hypothetical proof [...] must end with a proposition, not another hypothetical sequence."`;
+
+exports[`Tests in suite prop tests/prop/lost-track.tut should be flagged as an ill-formed file 1`] = `"The last line in a proof must be the proof's goal proposition."`;
+
 exports[`Tests in suite prop tests/prop/mp-error.tut should be flagged as an ill-formed file 1`] = `"Unexpected input ["`;
 
 exports[`Tests in suite prop tests/prop/noproof.tut should be flagged as an ill-formed file 1`] = `"Unexpected input ]"`;

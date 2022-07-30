@@ -1,7 +1,7 @@
 # Tutch
 
-[![Build Status](https://travis-ci.org/retutch/tutch.svg?branch=master)](https://travis-ci.org/retutch/tutch?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/retutch/tutch/badge.svg?branch=master)](https://coveralls.io/github/retutch/tutch?branch=master)
+
+[![Coverage Status](https://coveralls.io/repos/github/retutch/tutch/badge.svg)](https://coveralls.io/github/retutch/tutch)
 [![NPM Module](https://img.shields.io/npm/v/tutch.svg)](https://www.npmjs.com/package/tutch)
 
 A TypeScript implementation of the TUTorial proof CHecker (Tutch).
