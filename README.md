@@ -8,22 +8,22 @@ A TypeScript implementation of the TUTorial proof CHecker (Tutch), a language th
 This package just consists of the parser and proof checking logic for Tutch, which can be run like this in Node or in a tool like [RunKit](https://npm.runkit.com/tutch).
 
 ``` javascript
-    const tutch = require("tutch");
+const tutch = require("tutch");
 
-    const proofOfK = tutch.parse(`
+const proofOfK = tutch.parse(`
 
-    proof k : A => B => A =
-    begin
-    [ A;
-      [ B;
-        A ];
-      B => A ];
-    A => B => A
-    end;
+proof k : A => B => A =
+begin
+[ A;
+  [ B;
+    A ];
+ B => A ];
+A => B => A
+end;
 
-    `);
+`);
 
-    tutch.isJustified(proofOfK);
+tutch.isJustified(proofOfK);
 ```
 
 If you want to use Tutch, you can go to [https://tutch.glitch.me/].
