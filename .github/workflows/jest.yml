@@ -1,4 +1,4 @@
-name: Test with istanbul
+name: Test with jest
 
 on:
   push:
