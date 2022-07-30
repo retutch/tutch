@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, lstatSync } from 'fs';
 import { join, extname } from 'path';
 import * as Ast from './ast';
-import { isJustified, parse, parseProp } from '.';
+import { evaluateAssert, isJustified, parse, parseProp } from '.';
 import { Parser, Grammar } from 'nearley';
 import { ImpossibleError } from './error';
 //import { Proof } from './ast';
@@ -51,6 +51,15 @@ describe('proposition parser', () => {
   itShouldParseAndPrint('!a. ?b. A a b c', '(!a:t.(?b:t.A #1 #0 c))');
   itShouldParseAndPrint('?x. A x & ?x. A x', '(?x:t.(A #0 & (?x:t.A #0)))');
   itShouldParseAndPrint('!x. A x & !x. A x', '(!x:t.(A #0 & (!x:t.A #0)))');
+});
+
+describe('evaluateAssert', () => {
+  test('succeeds on a valid proof', async () => {
+    expect(() => evaluateAssert(parse('proof x : T = begin T end;'))).not.toThrow();
+  });
+  test('throws on an invalid proof', async () => {
+    expect(() => evaluateAssert(parse('proof x : F = begin F end;'))).toThrow();
+  });
 });
 
 const dir = './tests';
@@ -111,7 +120,6 @@ function testfile(filepath: string) {
 
   specs.forEach((spec, i) => {
     test(`${filepath}${i ? `.${i}` : ''} should ${spec.description}`, async () => {
-      console.log(spec.outcome);
       switch (spec.outcome) {
         case 'error':
           expect(() => parse(contents)).toThrowErrorMatchingSnapshot();

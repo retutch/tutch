@@ -1,5 +1,3 @@
-import { impossible } from '@calculemus/impossible';
-
 export interface Syn {
   readonly type: string;
   readonly range?: [number, number];
@@ -109,9 +107,6 @@ export function termToString(sigma: string[], term: Term): string {
     case 'TermVar': {
       return sigma[term.index];
     }
-    default: {
-      throw impossible(term);
-    }
   }
 }
 
@@ -137,9 +132,6 @@ export function propToString(sigma: string[], prop: Proposition): string {
     }
     case 'Atom':
       return `${prop.predicate}${prop.spine.map((tm) => ` ${termToString(sigma, tm)}`).join('')}`;
-    /* istanbul ignore next */
-    default:
-      throw impossible(prop);
   }
 }
 
@@ -154,9 +146,6 @@ export function termToStringDebug(term: Term): string {
       } else {
         return `(${term.head}${term.spine.map((tm) => ` ${termToStringDebug(tm)}`).join('')})`;
       }
-    }
-    default: {
-      throw impossible(term);
     }
   }
 }
@@ -181,9 +170,6 @@ export function propToStringDebug(prop: Proposition): string {
     }
     case 'Atom':
       return `${prop.predicate}${prop.spine.map((tm) => ` ${termToStringDebug(tm)}`).join('')}`;
-    /* istanbul ignore next */
-    default:
-      throw impossible(prop);
   }
 }
 
@@ -248,38 +234,5 @@ export function equalProps(a: Proposition, b: Proposition): boolean {
       return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
     case 'PropExists':
       return a.type === b.type && a.sort === b.sort && equalProps(a.argument, b.argument);
-    /* istanbul ignore next */
-    default:
-      return impossible(a);
   }
 }
-
-/*
-export interface Cell { match: null | Term }
-
-export function matchTerm(closed: Term, open: Term, cell: Cell): boolean {
-    if (open.head === 0) {
-        if (cell.match === null) {
-            cell.match = closed;
-            return true;
-        } else {
-            return equalTerms(closed, cell.match);
-        }
-    } else if (typeof closed.head === 'number' && typeof open.head === 'number') {
-        return closed.head === open.head + 1;
-    } else if (typeof closed.head === 'string' && typeof open.head === 'string') {
-        if (closed.head !== open.head || closed.spine.length !== open.spine.length) {
-            return false;
-        } else {
-            const matches = 
-        }
-    }
-    if (typeof closed.head === 'number' && typeof closed.open === 'number') {
-
-    }
-}
-
-export function matchProps(closed: Proposition, open: Proposition): boolean | Term {
-
-}
-*/
