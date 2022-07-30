@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tests in suite prop tests/prop/mp-error.tut should be flagged as an ill-formed file 1`] = `"Unexpected input ["`;
+
+exports[`Tests in suite prop tests/prop/noproof.tut should be flagged as an ill-formed file 1`] = `"Unexpected input ]"`;
+
+exports[`Tests in suite prop tests/prop/nowork.tut should be flagged as an ill-formed file 1`] = `"Unexpected input ]"`;
+
+exports[`proposition parser cannot parse '!A:t. B' as a proposition 1`] = `"Term variables must start with a lower case letter"`;
+
+exports[`proposition parser cannot parse '!h. A (h x)' as a proposition 1`] = `"Bound variable 'h' cannot have arguments applied to it."`;
+
+exports[`proposition parser cannot parse '!x:custom.A' as a proposition 1`] = `"Only \`t\` is allowed as a first-order type, not custom"`;
+
+exports[`proposition parser cannot parse '' as a proposition 1`] = `"Incomplete parse at the end of the file"`;
+
+exports[`proposition parser cannot parse '(' as a proposition 1`] = `"Incomplete parse at the end of the file"`;
+
+exports[`proposition parser cannot parse ')' as a proposition 1`] = `"Unexpected input )"`;
+
+exports[`proposition parser cannot parse '?A:t. B' as a proposition 1`] = `"Term variables must start with a lower case letter"`;
+
+exports[`proposition parser cannot parse 'A & let' as a proposition 1`] = `"Predicate names must start with an upper case letter"`;
+
+exports[`proposition parser cannot parse 'A B' as a proposition 1`] = `"Term variables and constants must start with a lower case letter"`;
+
+exports[`proposition parser cannot parse 'A x y & B y C' as a proposition 1`] = `"Term variables and constants must start with a lower case letter"`;
+
+exports[`proposition parser cannot parse 'Upper & lower' as a proposition 1`] = `"Predicate names must start with an upper case letter"`;
+
+exports[`proposition parser cannot parse 'lower & Upper' as a proposition 1`] = `"Predicate names must start with an upper case letter"`;
+
+exports[`proposition parser cannot parse 'nat => A' as a proposition 1`] = `"Unexpected input nat"`;
+
+exports[`proposition parser cannot parse '☄' as a proposition 1`] = `"Unexpected input ☄"`;

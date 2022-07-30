@@ -65,6 +65,10 @@ export function evaluate(proofs: Ast.Proof[]): Justification[] {
   return justs;
 }
 
+export function isJustified(proofs: Ast.Proof[]): boolean {
+  return evaluate(proofs).every((just) => just.type !== 'NotJustified');
+}
+
 export function evaluateAssert(proofs: Ast.Proof[]) {
   evaluate(proofs).forEach((just) => {
     if (just.type === 'NotJustified') throw new NoJustificationError('', just);
