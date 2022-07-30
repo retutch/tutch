@@ -15,7 +15,7 @@ jobs:
         run: npm ci
       - name: Run nearley
         run: npm run nearley
-      - name: Compile with typescript
-        run: npm run tsc
       - name: Run tests
         run: npm run test
+      - name: Build
+        run: npm run start
