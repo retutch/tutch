@@ -29,7 +29,7 @@ export function parseGrammar(grammar: Grammar, str: string) {
         `Unexpected input ${err.token.text}`,
       );
     } else {
-      throw new Error('Error with no token');
+      throw new Error('Error with no token.  (This error should be impossible, there is a bug!)');
     }
   }
   if (syn.length === 0) {
@@ -37,7 +37,10 @@ export function parseGrammar(grammar: Grammar, str: string) {
     throw new ParsingError({}, `Incomplete parse at the end of the file`);
   }
   /* istanbul ignore if  */
-  if (syn.length !== 1) throw new Error(`Ambiguous parse of ${str} (${syn.length} parses)`);
+  if (syn.length !== 1)
+    throw new Error(
+      `Ambiguous parse of ${str} (${syn.length} parses).  (This error should be impossible, there is a bug!)`,
+    );
   return syn[0];
 }
 
