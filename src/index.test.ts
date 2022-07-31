@@ -97,7 +97,7 @@ export function parseSpec(spec: string, filename?: string): Spec[] {
   if (specs.length === 0) throw new Error('No test spec found');
   /* istanbul ignore next */
   if (specs.length > 1) {
-    throw new Error('Test spec parsing ambiguous');
+    throw new Error('Test spec parsing ambiguous.  (This error should be impossible, there is a bug!)');
   }
 
   return specs[0][0].map((spec: any) => {
@@ -111,7 +111,7 @@ export function parseSpec(spec: string, filename?: string): Spec[] {
           return { outcome: 'pass', description: 'pass' };
         /* istanbul ignore next */
         default:
-          throw new Error(`Unexpected condition ${cond} (should be impossible, please report)`);
+          throw new Error(`Unexpected condition ${cond}.  (This error should be impossible, there is a bug!)`);
       }
     })(spec[2][0]);
   });
