@@ -37,8 +37,7 @@ export function parseGrammar(grammar: Grammar, str: string) {
     throw new ParsingError({}, `Incomplete parse at the end of the file`);
   }
   /* istanbul ignore if  */
-  if (syn.length !== 1)
-    throw new Error(`Ambiguous parse of ${str} (${syn.length} parses)`);
+  if (syn.length !== 1) throw new Error(`Ambiguous parse of ${str} (${syn.length} parses)`);
   return syn[0];
 }
 

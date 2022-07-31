@@ -193,7 +193,9 @@ export function BinaryProposition([
     case '=>':
       break;
     default:
-      throw new Error(`Unidentified binary proposition %{oper}. (This error should be impossible, there is a bug!)`);
+      throw new Error(
+        `Unidentified binary proposition %{oper}. (This error should be impossible, there is a bug!)`,
+      );
   }
   return {
     type: 'BinaryProposition',
@@ -239,7 +241,9 @@ export function QuantifiedProposition([
     case '?':
       break;
     default:
-      throw new Error(`Unidentified quantifier %{oper}. (This error should be impossible, there is a bug!)`);
+      throw new Error(
+        `Unidentified quantifier %{oper}. (This error should be impossible, there is a bug!)`,
+      );
   }
   return {
     type: 'QuantifiedProposition',
