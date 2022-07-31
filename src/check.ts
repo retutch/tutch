@@ -1,5 +1,4 @@
 import { Proposition, ProofStep, SourceLocation, Syn, Proof, equalProps, Hypothesis } from './ast';
-import { ImpossibleError, NoJustificationError } from './error';
 import { openProp, openProofStep, matchProp } from './substitution';
 
 export type Justification = Justified | NotJustified;
@@ -109,9 +108,6 @@ function checkProofStep(
   step: ProofStep,
 ): { hyp: Hyp; justs: Justification[] } {
   if (step.type === 'HypotheticalProof') {
-    // Check a hypothetical proof (multiple steps)
-    if (step.hypotheses.length === 0) throw new ImpossibleError('No hypotheses');
-
     const closedHyps = step.hypotheses.slice();
     const openHyps = [];
     let steps = step.steps.slice();
@@ -440,11 +436,4 @@ export function checkProof(proof: Proof, lemmas?: Lemmas): Justification[] {
   }
 
   return justs.concat([goalJust]);
-}
-
-export function assertProof(proof: Proof) {
-  const justs = checkProof(proof);
-  justs.forEach((just) => {
-    if (just.type === 'NotJustified') throw new NoJustificationError('', just.loc);
-  });
 }
