@@ -26,9 +26,6 @@ export interface Syn {
 }
 
 type WS = string;
-function WS(): WS {
-  return '';
-}
 
 export interface TermParens extends Syn {
   type: 'Parens';
@@ -192,6 +189,7 @@ export function BinaryProposition([
     case '<=>':
     case '=>':
       break;
+    /* istanbul ignore next */
     default:
       throw new Error(
         `Unidentified binary proposition %{oper}. (This error should be impossible, there is a bug!)`,
@@ -240,6 +238,7 @@ export function QuantifiedProposition([
     case '!':
     case '?':
       break;
+    /* istanbul ignore next */
     default:
       throw new Error(
         `Unidentified quantifier %{oper}. (This error should be impossible, there is a bug!)`,

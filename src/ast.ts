@@ -87,7 +87,7 @@ export interface PropExists extends Syn {
 function freshenRelativeTo(sigma: string[], x: string): string {
   let i = 0;
   let z = x;
-  while (sigma.some((y) => x === y)) {
+  while (sigma.some((y) => z === y)) {
     i += 1;
     z = `${x}${i}`;
   }

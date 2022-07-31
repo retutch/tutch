@@ -12,9 +12,10 @@ function itShouldRejectWithParsingError(str: string) {
   });
 }
 
-function itShouldParseAndPrint(input: string, output: string) {
-  test(`parsing and printing '${input}' produces '${output}'`, async () => {
-    expect(Ast.propToStringDebug(parseProp(input))).toEqual(output);
+function itShouldParseAndPrint(input: string, outputDebug: string, outputPretty?: string) {
+  test(`parsing and printing '${input}' produces '${outputDebug}' / '${outputPretty}'`, async () => {
+    expect(Ast.propToStringDebug(parseProp(input))).toEqual(outputDebug);
+    expect(Ast.propToString([], parseProp(input))).toEqual(outputPretty || 'x');
   });
 }
 
@@ -34,21 +35,37 @@ describe('proposition parser', () => {
   itShouldRejectWithParsingError('!h. A (h x)');
   itShouldRejectWithParsingError('A B');
 
-  itShouldParseAndPrint('!x. A(h x)', '(!x:t.A (h #0))');
-  itShouldParseAndPrint('A x y z', 'A x y z');
-  itShouldParseAndPrint('A => B', '(A => B)');
-  itShouldParseAndPrint('A => B => C', '(A => (B => C))');
-  itShouldParseAndPrint('A & B => C & D', '((A & B) => (C & D))');
-  itShouldParseAndPrint('A & !a:t. B & C', '(A & (!a:t.(B & C)))');
-  itShouldParseAndPrint('A => !a:t. B & C', '(A => (!a:t.(B & C)))');
-  itShouldParseAndPrint('A & !a:t. B => C', '(A & (!a:t.(B => C)))');
-  itShouldParseAndPrint('A | ?a:t. B => C', '(A | (?a:t.(B => C)))');
-  itShouldParseAndPrint('A => ?a:t. B | C', '(A => (?a:t.(B | C)))');
-  itShouldParseAndPrint('F => ?a:t. B a | C b', '(F => (?a:t.(B #0 | C b)))');
-  itShouldParseAndPrint('T => !b:t. B a | C b', '(T => (!b:t.(B a | C #0)))');
-  itShouldParseAndPrint('!a. ?b. A a b c', '(!a:t.(?b:t.A #1 #0 c))');
-  itShouldParseAndPrint('?x. A x & ?x. A x', '(?x:t.(A #0 & (?x:t.A #0)))');
-  itShouldParseAndPrint('!x. A x & !x. A x', '(!x:t.(A #0 & (!x:t.A #0)))');
+  itShouldParseAndPrint('!x. A(h x)', '(!x:t.A (h #0))', '(!x:t.A (h x))');
+  itShouldParseAndPrint('A x y z', 'A x y z', 'A x y z');
+  itShouldParseAndPrint('A => B', '(A => B)', '(A => B)');
+  itShouldParseAndPrint('A => B => C', '(A => (B => C))', '(A => (B => C))');
+  itShouldParseAndPrint('A & B => C & D', '((A & B) => (C & D))', '((A & B) => (C & D))');
+  itShouldParseAndPrint('A & !a:t. B & C', '(A & (!a:t.(B & C)))', '(A & (!a:t.(B & C)))');
+  itShouldParseAndPrint('A => !a:t. B & C', '(A => (!a:t.(B & C)))', '(A => (!a:t.(B & C)))');
+  itShouldParseAndPrint('A & !a:t. B => C', '(A & (!a:t.(B => C)))', '(A & (!a:t.(B => C)))');
+  itShouldParseAndPrint('A | ?a:t. B => C', '(A | (?a:t.(B => C)))', '(A | (?a:t.(B => C)))');
+  itShouldParseAndPrint('A => ?a:t. B | C', '(A => (?a:t.(B | C)))', '(A => (?a:t.(B | C)))');
+  itShouldParseAndPrint(
+    'F => ?a:t. B a | C b',
+    '(F => (?a:t.(B #0 | C b)))',
+    '(F => (?a:t.(B a | C b)))',
+  );
+  itShouldParseAndPrint(
+    'T => !b:t. B a | C b',
+    '(T => (!b:t.(B a | C #0)))',
+    '(T => (!b:t.(B a | C b)))',
+  );
+  itShouldParseAndPrint('!a. ?b. A a b c', '(!a:t.(?b:t.A #1 #0 c))', '(!a:t.(?b:t.A a b c))');
+  itShouldParseAndPrint(
+    '?x. A x & ?x. A x',
+    '(?x:t.(A #0 & (?x:t.A #0)))',
+    '(?x:t.(A x & (?x1:t.A x1)))',
+  );
+  itShouldParseAndPrint(
+    '!x. A x & !x. A x',
+    '(!x:t.(A #0 & (!x:t.A #0)))',
+    '(!x:t.(A x & (!x1:t.A x1)))',
+  );
 });
 
 describe('evaluateAssert', () => {
