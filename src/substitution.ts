@@ -198,8 +198,11 @@ export function matchTerm(
     case 'TermVar':
       if (openTerm.index === index) {
         if (cell.contents === null) {
-          // Occurs check
-          if (!isClosed(closedTerm)) return false;
+          // We cannot instantiate a variable that refers to bound variables.
+          // This check prevents us from using ?z. A z to prove ?x.?z. A x
+          if (!isClosed(closedTerm)) {
+            return false;
+          }
 
           cell.contents = closedTerm;
           return true;
