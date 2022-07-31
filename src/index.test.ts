@@ -3,8 +3,6 @@ import { join, extname } from 'path';
 import * as Ast from './ast';
 import { evaluateAssert, isJustified, parse, parseProp } from '.';
 import { Parser, Grammar } from 'nearley';
-import { ImpossibleError } from './error';
-//import { Proof } from './ast';
 
 const testSpecRules = require('../dist/spec-rules');
 
@@ -82,7 +80,7 @@ export function parseSpec(spec: string, filename?: string): Spec[] {
   if (specs.length === 0) throw new Error('No test spec found');
   /* istanbul ignore next */
   if (specs.length > 1) {
-    throw new ImpossibleError('Test spec parsing ambiguous');
+    throw new Error('Test spec parsing ambiguous');
   }
 
   return specs[0][0].map((spec: any) => {
