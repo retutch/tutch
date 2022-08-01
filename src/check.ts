@@ -409,10 +409,10 @@ function checkProofStep(
   }
 }
 
-export function checkProof(proof: Proof, lemmas?: Lemmas): Justification[] {
+export function checkProof(proof: Proof, lemmas: Lemmas): Justification[] {
   const hyps: Hyp[] = [];
   const { justs } = checkProofSteps(
-    lemmas || new Map(),
+    lemmas,
     hyps,
     proof.proof.concat([proof.consequent]),
   );
