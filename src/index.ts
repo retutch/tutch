@@ -2,7 +2,7 @@ import * as Ast from './ast';
 import { Parser, Grammar } from 'nearley';
 import { checkProof, Justification } from './check';
 import { Proof, Proposition } from './parse/restrict';
-import { ParsingError, NoJustificationError } from './error';
+import { ParsingError } from './error';
 const rules = require('../dist/rules');
 const proposition = require('../dist/proposition');
 export { ParsingError } from './error';
@@ -68,10 +68,4 @@ export function evaluate(proofs: Ast.Proof[]): Justification[] {
 
 export function isJustified(proofs: Ast.Proof[]): boolean {
   return evaluate(proofs).every((just) => just.type !== 'NotJustified');
-}
-
-export function evaluateAssert(proofs: Ast.Proof[]) {
-  evaluate(proofs).forEach((just) => {
-    if (just.type === 'NotJustified') throw new NoJustificationError('', just.loc);
-  });
 }
