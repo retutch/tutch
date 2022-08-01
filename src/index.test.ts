@@ -35,9 +35,14 @@ describe('proposition parser', () => {
   itShouldRejectWithParsingError('!h. A (h x)');
   itShouldRejectWithParsingError('A B');
 
-  itShouldParseAndPrint('!x. A(h x)', '(!x:t.A (h #0))', '(!x:t.A (h x))');
+  itShouldParseAndPrint(
+    '!x. A(h x (h x x))',
+    '(!x:t.A (h #0 (h #0 #0)))',
+    '(!x:t.A (h x (h x x)))',
+  );
   itShouldParseAndPrint('A x y z', 'A x y z', 'A x y z');
   itShouldParseAndPrint('A => B', '(A => B)', '(A => B)');
+  itShouldParseAndPrint('A <=> B', '((A => B) & (B => A))', '((A => B) & (B => A))');
   itShouldParseAndPrint('A => B => C', '(A => (B => C))', '(A => (B => C))');
   itShouldParseAndPrint('A & B => C & D', '((A & B) => (C & D))', '((A & B) => (C & D))');
   itShouldParseAndPrint('A & !a:t. B & C', '(A & (!a:t.(B & C)))', '(A & (!a:t.(B & C)))');
@@ -75,41 +80,29 @@ export interface Spec {
   description: string;
 }
 
-export function parseSpec(spec: string, filename?: string): Spec[] {
-  let specs;
+export function parseSpec(str: string, filename?: string): Spec {
+  let spec;
   try {
     const specParser = new Parser(Grammar.fromCompiled(testSpecRules));
-    specParser.feed(spec);
-    specs = specParser.finish();
+    specParser.feed(str);
+    spec = specParser.finish()[0];
   } catch (err) {
     throw new Error(`Error parsing test spec ${filename ? `for ${filename}` : ''}:\n${err}`);
   }
 
-  if (specs.length === 0) throw new Error('No test spec found');
-  /* istanbul ignore next */
-  if (specs.length > 1) {
-    throw new Error(
-      'Test spec parsing ambiguous.  (This error should be impossible, there is a bug!)',
-    );
+  switch (spec[1][0]) {
+    case 'error':
+      return { outcome: 'error', description: 'be flagged as an ill-formed file' };
+    case 'reject':
+      return { outcome: 'reject', description: 'be rejected' };
+    case 'pass':
+      return { outcome: 'pass', description: 'pass' };
+    /* istanbul ignore next */
+    default:
+      throw new Error(
+        `Unexpected condition ${spec[1][0]}.  (This error should be impossible, there is a bug!)`,
+      );
   }
-
-  return specs[0][0].map((spec: any) => {
-    return ((cond: string): Spec => {
-      switch (cond) {
-        case 'error':
-          return { outcome: 'error', description: 'be flagged as an ill-formed file' };
-        case 'reject':
-          return { outcome: 'reject', description: 'be rejected' };
-        case 'pass':
-          return { outcome: 'pass', description: 'pass' };
-        /* istanbul ignore next */
-        default:
-          throw new Error(
-            `Unexpected condition ${cond}.  (This error should be impossible, there is a bug!)`,
-          );
-      }
-    })(spec[2][0]);
-  });
 }
 
 function testfile(filepath: string) {
@@ -120,16 +113,10 @@ function testfile(filepath: string) {
     return;
   }
 
-  let specs: Spec[];
+  let spec: Spec;
   try {
-    specs = parseSpec(spectxt[0], filepath);
-  } catch (err: any) {
-    console.log(err.message);
-    specs = [];
-  }
-
-  specs.forEach((spec, i) => {
-    test(`${filepath}${i ? `.${i}` : ''} should ${spec.description}`, async () => {
+    spec = parseSpec(spectxt[0], filepath);
+    test(`${filepath} should ${spec.description}`, async () => {
       switch (spec.outcome) {
         case 'error':
           expect(() => parse(contents)).toThrowErrorMatchingSnapshot();
@@ -142,7 +129,10 @@ function testfile(filepath: string) {
           break;
       }
     });
-  });
+  } catch (err: any) {
+    // Will always fail
+    expect(err).not.toBeTruthy();
+  }
 }
 
 readdirSync(dir).forEach((subdir) => {

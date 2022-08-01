@@ -101,7 +101,7 @@ export function termToString(sigma: string[], term: Term): string {
       if (term.spine.length === 0) {
         return term.head;
       } else {
-        return `(${term.head}${term.spine.map((tm) => ` ${termToString(sigma, tm)}`)})`;
+        return `(${term.head}${term.spine.map((tm) => ` ${termToString(sigma, tm)}`).join('')})`;
       }
     }
     case 'TermVar': {
