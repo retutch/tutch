@@ -4,10 +4,10 @@ import { ParsingError } from '../error';
 import { closeProp, closeProofStep } from '../substitution';
 
 function range(x: [number, number]): [number, number] | undefined {
-    return x;
-};
+  return x;
+}
 function loc(x: ast.SourceLocation): ast.SourceLocation | undefined {
-    return x;
+  return x;
 }
 
 export function TermAtom(syn: parse.TermAtom): ast.Term {
@@ -220,7 +220,10 @@ export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
       const hypotheses = syn.hypotheses.map(Hypothesis);
       let steps = syn.steps.map(ProofStep);
       /* istanbul ignore if */
-      if (steps.length === 0) throw new Error('Hypothetical proof has zero steps. (This error should be impossible, there is a bug!)');
+      if (steps.length === 0)
+        throw new Error(
+          'Hypothetical proof has zero steps. (This error should be impossible, there is a bug!)',
+        );
       let consequent = steps.pop()!;
       if (consequent.type === 'HypotheticalProof')
         throw new ParsingError(
