@@ -4,9 +4,7 @@ import * as ast from '../ast';
 function tokloc(tok: Token) {
   return {
     start: { line: tok.line, column: tok.col },
-    end: tok.lineBreaks
-      ? { line: tok.line + 1, column: 1 }
-      : { line: tok.line, column: tok.col + tok.text.length },
+    end: { line: tok.line, column: tok.col + tok.text.length },
     source: null,
   };
 }
