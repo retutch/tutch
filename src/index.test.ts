@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, lstatSync } from 'fs';
 import { join, extname } from 'path';
 import * as Ast from './ast';
-import { evaluateAssert, isJustified, parse, parseProp } from '.';
+import { isJustified, parse, parseProp } from '.';
 import { Parser, Grammar } from 'nearley';
 
 const testSpecRules = require('../dist/spec-rules');
@@ -66,15 +66,6 @@ describe('proposition parser', () => {
     '(!x:t.(A #0 & (!x:t.A #0)))',
     '(!x:t.(A x & (!x1:t.A x1)))',
   );
-});
-
-describe('evaluateAssert', () => {
-  test('succeeds on a valid proof', async () => {
-    expect(() => evaluateAssert(parse('proof x : T = begin T end;'))).not.toThrow();
-  });
-  test('throws on an invalid proof', async () => {
-    expect(() => evaluateAssert(parse('proof x : F = begin F end;'))).toThrow();
-  });
 });
 
 const dir = './tests';

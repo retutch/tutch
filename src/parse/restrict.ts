@@ -3,8 +3,12 @@ import * as parse from './parse';
 import { ParsingError } from '../error';
 import { closeProp, closeProofStep } from '../substitution';
 
-let range = true;
-let loc = true;
+function range(x: [number, number]): [number, number] | undefined {
+  return x;
+}
+function loc(x: ast.SourceLocation): ast.SourceLocation | undefined {
+  return x;
+}
 
 export function TermAtom(syn: parse.TermAtom): ast.Term {
   if (!syn.head.match(/^[a-z]/))
@@ -14,8 +18,8 @@ export function TermAtom(syn: parse.TermAtom): ast.Term {
     type: 'TermConst',
     head: syn.head,
     spine: syn.spine.map(Term),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -28,19 +32,19 @@ export function Term(syn: parse.Term): ast.Term {
   }
 }
 
-export function PropTrue(syn: ast.PropTrue): ast.PropTrue {
+export function PropTrue(syn: parse.Proposition): ast.PropTrue {
   return {
     type: 'PropTrue',
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
 export function PropFalse(syn: parse.Proposition): ast.PropFalse {
   return {
     type: 'PropFalse',
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -52,8 +56,8 @@ export function PropAtom(syn: parse.PropAtom): ast.Atom {
     type: 'Atom',
     predicate: syn.head,
     spine: syn.spine.map(Term),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -62,8 +66,8 @@ export function PropAnd(syn: parse.BinaryProposition): ast.PropAnd {
     type: 'PropAnd',
     left: Proposition(syn.left),
     right: Proposition(syn.right),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -72,8 +76,8 @@ export function PropImplies(syn: parse.BinaryProposition, swap?: true): ast.Prop
     type: 'PropImplies',
     left: Proposition(swap ? syn.right : syn.left),
     right: Proposition(swap ? syn.left : syn.right),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -82,8 +86,8 @@ export function PropEquiv(syn: parse.BinaryProposition): ast.PropAnd {
     type: 'PropAnd',
     left: PropImplies(syn),
     right: PropImplies(syn, true),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -92,8 +96,8 @@ export function PropOr(syn: parse.BinaryProposition): ast.PropOr {
     type: 'PropOr',
     left: Proposition(syn.left),
     right: Proposition(syn.right),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -102,8 +106,8 @@ export function PropNot(syn: parse.UnaryProposition): ast.PropImplies {
     type: 'PropImplies',
     left: Proposition(syn.argument),
     right: PropFalse(syn),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -127,8 +131,8 @@ export function PropAll(syn: parse.QuantifiedProposition): ast.PropAll {
     variable: syn.variable,
     sort: Sort(syn.loc, syn.sort),
     argument: closeProp(Proposition(syn.argument), 0, syn.variable),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -141,8 +145,8 @@ export function PropExists(syn: parse.QuantifiedProposition): ast.PropExists {
     variable: syn.variable,
     sort: Sort(syn.loc, syn.sort),
     argument: closeProp(Proposition(syn.argument), 0, syn.variable),
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
   };
 }
 
@@ -201,8 +205,8 @@ export function Hypothesis(syn: parse.Hypothesis): ast.Hypothesis {
         type: 'VariableDeclaration',
         variable: syn.variable,
         sort: sort,
-        range: range ? syn.range : undefined,
-        loc: loc ? syn.loc : undefined,
+        range: range(syn.range),
+        loc: loc(syn.loc),
       };
     }
     default:
@@ -215,7 +219,11 @@ export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
     case 'HypotheticalProof':
       const hypotheses = syn.hypotheses.map(Hypothesis);
       let steps = syn.steps.map(ProofStep);
-      if (steps.length === 0) throw new ParsingError(syn, 'Hypothetical proof has zero steps');
+      /* istanbul ignore if */
+      if (steps.length === 0)
+        throw new Error(
+          'Hypothetical proof has zero steps. (This error should be impossible, there is a bug!)',
+        );
       let consequent = steps.pop()!;
       if (consequent.type === 'HypotheticalProof')
         throw new ParsingError(
@@ -243,8 +251,8 @@ export function ProofStep(syn: parse.ProofStep): ast.ProofStep {
         hypotheses,
         steps,
         consequent,
-        range: range ? syn.range : undefined,
-        loc: loc ? syn.loc : undefined,
+        range: range(syn.range),
+        loc: loc(syn.loc),
       };
     default:
       return Proposition(syn);
@@ -266,8 +274,8 @@ export function Proof(syn: parse.ProofDeclaration): ast.Proof {
     name: syn.name,
     goal,
     proof,
-    range: range ? syn.range : undefined,
-    loc: loc ? syn.loc : undefined,
+    range: range(syn.range),
+    loc: loc(syn.loc),
     consequent,
   };
 }

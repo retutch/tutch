@@ -409,13 +409,9 @@ function checkProofStep(
   }
 }
 
-export function checkProof(proof: Proof, lemmas?: Lemmas): Justification[] {
+export function checkProof(proof: Proof, lemmas: Lemmas): Justification[] {
   const hyps: Hyp[] = [];
-  const { justs } = checkProofSteps(
-    lemmas || new Map(),
-    hyps,
-    proof.proof.concat([proof.consequent]),
-  );
+  const { justs } = checkProofSteps(lemmas, hyps, proof.proof.concat([proof.consequent]));
   const unjustified = justs.filter(({ type }) => type === 'NotJustified');
 
   let goalJust: Justification;
