@@ -28,4 +28,31 @@ tutch.isJustified(proofOfK);
 
 If you want to use Tutch, you can go to https://tutch.glitch.me/.
 
-This version of Tutch was used in the Fall 2019 [Computational Applied Logic](https://sites.google.com/a/ncsu.edu/csc-503-f19/) course at North Carolina State University. The Tutch proof checker was origianlly written in Standard ML by Andreas Abel, Bor-Yuh Evan Chang, and Frank Pfenning. Original documentation can be found at http://www2.tcs.ifi.lmu.de/~abel/tutch/
+Version 0.3.x of Tutch was used in the Fall 2019 [Computational Applied Logic](https://sites.google.com/a/ncsu.edu/csc-503-f19/) course at North Carolina State University. The Tutch proof checker was origianlly written in Standard ML by Andreas Abel, Bor-Yuh Evan Chang, and Frank Pfenning. Original documentation can be found at http://www2.tcs.ifi.lmu.de/~abel/tutch/
+
+# Release
+
+(This probably includes some redundancy, they're just notes to self so I remember how to do this.)
+
+```
+npm install
+npm run nearley
+npm run test
+```
+
+Change package.json to reflect the new version number, then:
+
+```
+npm install
+npm run build
+git checkout -b <### whatever ###>
+git commit -a -m "New version"
+git push --set-upstream origin <### whatever ###>
+```
+
+Merge that, then
+
+```
+git checkout main
+git tag v0.4.0
+```
