@@ -50,9 +50,13 @@ git commit -a -m "New version"
 git push --set-upstream origin <### whatever ###>
 ```
 
-Merge that, then
+Merge that, then:
 
 ```
 git checkout main
+git pull
 git tag v0.4.0
+git push --tags
+npm run build
+npm publish
 ```
