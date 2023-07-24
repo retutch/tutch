@@ -45,7 +45,14 @@ Change package.json to reflect the new version number, then:
 ```
 npm install
 npm run build
-git checkout -b ### whatever ###
+git checkout -b <### whatever ###>
 git commit -a -m "New version"
-git 
+git push --set-upstream origin <### whatever ###>
+```
+
+Merge that, then
+
+```
+git checkout main
+git tag v0.4.0
 ```
