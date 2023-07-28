@@ -21,7 +21,7 @@ Merge that, then:
 git checkout main
 git pull
 git tag <### vX.X.X ###>
-git push <### vX.X.X ###>
+git push --tags
 npm run build
 npm publish
 ```
